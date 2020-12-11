@@ -8,20 +8,29 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.websocket.*
+import kotlinx.coroutines.Job
+import me.plony.bot.script.startServices
 
-private val services = mutableSetOf<Service>()
+internal val services = mutableSetOf<Service>()
 
-fun service(name: String, author: String, setup: Kord.() -> Unit) {
-    services.add(Service(name, author, setup))
-}
+fun service(
+    name: String,
+    version: String,
+    author: String,
+    job: Job,
+) = Service(name, version, author, job).also { services.add(it) }
 
-fun server(port: Int, wait: Boolean = false) = embeddedServer(CIO, port = port) {
-    install(WebSockets)
+fun Kord.server(port: Int, wait: Boolean = false) = embeddedServer(CIO, port = port) {
     install(ContentNegotiation) { json() }
     routing {
-        get("services") {
-            call.respond(services)
+        route("services") {
+            get {
+                call.respond(services)
+            }
+            get("reload") {
+                services.forEach { it.cancel() }
+                startServices()
+            }
         }
     }
 }.start(wait = wait)
