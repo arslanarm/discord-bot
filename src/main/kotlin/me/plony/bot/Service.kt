@@ -12,8 +12,6 @@ import kotlinx.serialization.Transient
 @Serializable
 data class Service(
     val name: String,
-    val version: String,
-    val author: String,
     @Transient val coroutineScope: Job = Job()
 )
 

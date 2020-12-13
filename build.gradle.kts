@@ -30,6 +30,29 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
     implementation("io.github.microutils:kotlin-logging:1.12.0")
     implementation("org.slf4j:slf4j-simple:1.7.30")
+
+    implementation(project(":scripting"))
+}
+
+subprojects {
+    plugins.apply("org.jetbrains.kotlin.jvm")
+    plugins.apply("org.jetbrains.kotlin.plugin.serialization")
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven(url = "https://dl.bintray.com/kordlib/Kord")
+    }
+
+    tasks.withType<KotlinCompile>() {
+        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.freeCompilerArgs = listOf(
+            "-Xopt-in=kotlin.time.ExperimentalTime",
+            "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
+            "-Xopt-in=kotlin.contracts.ExperimentalContracts",
+            "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
+        )
+    }
 }
 
 

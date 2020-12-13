@@ -15,10 +15,8 @@ internal val services = mutableSetOf<Service>()
 
 fun service(
     name: String,
-    version: String,
-    author: String,
     job: Job,
-) = Service(name, version, author, job).also { services.add(it) }
+) = Service(name, job).also { services.add(it) }
 
 fun Kord.server(port: Int, wait: Boolean = false) = embeddedServer(CIO, port = port) {
     install(ContentNegotiation) { json() }
@@ -29,7 +27,7 @@ fun Kord.server(port: Int, wait: Boolean = false) = embeddedServer(CIO, port = p
             }
             get("reload") {
                 services.forEach { it.cancel() }
-                startServices()
+                startServices("./services")
             }
         }
     }

@@ -18,7 +18,7 @@ suspend fun main(args: Array<String>) {
     }
     with (kord) {
         server(port)
-        on<ReadyEvent> { startServices() }
+        on<ReadyEvent> { startServices("./services") }
         login()
     }
 }
