@@ -2,6 +2,9 @@
 import me.plony.bot.scripting.on
 import dev.kord.core.event.message.MessageCreateEvent
 
+
 on<MessageCreateEvent> {
-    message.channel.createMessage("Hi")
+    if (message.content == "ping") {
+        message.channel.createMessage("Pong")
+    }
 }
