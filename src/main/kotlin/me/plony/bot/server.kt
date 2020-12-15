@@ -9,25 +9,18 @@ import io.ktor.serialization.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import kotlinx.coroutines.Job
-import me.plony.bot.script.startServices
+import me.plony.processor.ServiceManager
 
-internal val services = mutableSetOf<Service>()
 
-fun service(
-    name: String,
-    job: Job,
-) = Service(name, job).also { services.add(it) }
-
-fun Kord.server(port: Int, wait: Boolean = false) = embeddedServer(CIO, port = port) {
+fun Kord.server(port: Int, serviceManager: ServiceManager, wait: Boolean = false) = embeddedServer(CIO, port = port) {
     install(ContentNegotiation) { json() }
     routing {
         route("services") {
             get {
-                call.respond(services)
+                call.respond(serviceManager.serviceList.map { it.name })
             }
             get("reload") {
-                services.forEach { it.cancel() }
-                startServices("./services")
+                serviceManager.restartAll()
             }
         }
     }

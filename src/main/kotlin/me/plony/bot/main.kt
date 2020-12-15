@@ -1,12 +1,12 @@
 
 package me.plony.bot
 
+import createServices
 import dev.kord.core.Kord
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.on
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
-import me.plony.bot.script.startServices
 
 suspend fun main(args: Array<String>) {
     val token = args.getOrNull(0) ?: error("Token must be specified")
@@ -17,8 +17,8 @@ suspend fun main(args: Array<String>) {
         }
     }
     with (kord) {
-        server(port)
-        on<ReadyEvent> { startServices("./services") }
+        val serviceManager = createServices()
+        server(port, serviceManager)
         login()
     }
 }
