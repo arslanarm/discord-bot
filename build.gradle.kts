@@ -13,11 +13,14 @@ repositories {
     mavenCentral()
     jcenter()
     maven(url = "https://dl.bintray.com/kordlib/Kord")
+    maven(url = "https://jitpack.io")
 }
 
 dependencies {
     implementation("com.gitlab.kordlib:kordx.emoji:0.4.0")
-    implementation("dev.kord:kord-core:0.7.0-RC")
+    implementation("com.gitlab.kordlib.kord:kord-core:0.6.10")
+    implementation(project(":lavakord"))
+
     implementation("io.ktor:ktor-client-cio:1.4.3")
     implementation("io.ktor:ktor-server-cio:1.4.3")
     implementation("io.ktor:ktor-websockets:1.4.3")
@@ -37,8 +40,9 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven("https://jitpack.io")
+        maven("https://dl.bintray.com/kordlib/Kord")
         jcenter()
-        maven(url = "https://dl.bintray.com/kordlib/Kord")
     }
 
     tasks.withType<KotlinCompile>() {
@@ -46,6 +50,7 @@ subprojects {
         kotlinOptions.freeCompilerArgs = listOf(
             "-Xopt-in=kotlin.time.ExperimentalTime",
             "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
+            "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-Xopt-in=kotlin.contracts.ExperimentalContracts",
             "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
         )
@@ -57,6 +62,7 @@ tasks.withType<KotlinCompile>() {
     kotlinOptions.freeCompilerArgs = listOf(
         "-Xopt-in=kotlin.time.ExperimentalTime",
         "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
+        "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
         "-Xopt-in=kotlin.contracts.ExperimentalContracts",
         "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
     )

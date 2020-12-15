@@ -1,8 +1,9 @@
 package me.plony.processor
 
-import dev.kord.core.Kord
-import dev.kord.core.event.Event
-import dev.kord.core.on
+
+import com.gitlab.kordlib.core.Kord
+import com.gitlab.kordlib.core.event.Event
+import com.gitlab.kordlib.core.on
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
@@ -14,4 +15,4 @@ data class DiscordReceiver(
 ) : CoroutineScope
 
 fun Kord.newDiscordReceiver() = DiscordReceiver(this)
-inline fun <reified T: Event> DiscordReceiver.on(noinline block: suspend T.() -> Unit) = kord.on<T>(this, block)
+inline fun <reified T: Event> DiscordReceiver.on(noinline block: suspend T.() -> Unit) = kord.on(this, block)

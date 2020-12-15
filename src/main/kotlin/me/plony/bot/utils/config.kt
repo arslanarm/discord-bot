@@ -15,7 +15,7 @@ inline fun <reified T> readConfig(deserializer: DeserializationStrategy<T>, dire
 
     val file = File(directory, filename)
     if (!file.exists()) {
-        file.writeText("")
+        file.createNewFile()
         fail = true
     }
 

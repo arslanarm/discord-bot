@@ -1,6 +1,6 @@
 package me.plony.processor
 
-import dev.kord.core.Kord
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

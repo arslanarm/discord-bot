@@ -1,9 +1,9 @@
 package me.plony.processor
 
+import com.gitlab.kordlib.core.Kord
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
-import dev.kord.core.Kord
 import me.plony.processor.dsl.code
 import me.plony.processor.dsl.fileSpec
 import me.plony.processor.dsl.function
