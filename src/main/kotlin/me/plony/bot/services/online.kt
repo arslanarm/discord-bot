@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.count
 fun DiscordReceiver.online() {
 
     on<MessageCreateEvent> {
-       if(message.author?.isBot == true || message.content != "online") return@on
+        if(message.author?.isBot == true || message.content != "online") return@on
 
         val guild = getGuild()!!
         val onlineMembers = guild.members
