@@ -1,6 +1,6 @@
 package me.plony.bot.services
 
-import com.gitlab.kordlib.core.behavior.channel.TextChannelBehavior
+import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
 import com.gitlab.kordlib.core.behavior.channel.createEmbed
 import com.gitlab.kordlib.core.entity.Message
 import com.gitlab.kordlib.core.entity.channel.VoiceChannel
@@ -8,18 +8,21 @@ import com.gitlab.kordlib.core.event.gateway.ReadyEvent
 import com.gitlab.kordlib.core.event.message.MessageCreateEvent
 import com.gitlab.kordlib.core.kordLogger
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import lavalink.client.io.Link
 import me.plony.bot.music.GuildMusicManagers
+import me.plony.bot.music.MusicManager
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
 import me.schlaubi.lavakord.connect
 import me.schlaubi.lavakord.lavalink
+import me.schlaubi.lavakord.rest.TrackResponse
 import me.schlaubi.lavakord.rest.TrackResponse.LoadType.*
 import me.schlaubi.lavakord.rest.loadItem
 import java.net.URI
 import kotlin.time.milliseconds
-import kotlin.time.seconds
 
 @Module
 fun DiscordReceiver.music() {
@@ -92,34 +95,8 @@ fun DiscordReceiver.music() {
                 // Loading the track
                 val result = link.loadItem(query)
                 try {
-                    when (result.loadType) {
-                        // If it loaded adding it to the queue
-                        TRACK_LOADED, SEARCH_RESULT -> {
-                            val track = result.tracks.first().toAudioTrack()
-                            message.channel.createEmbed {
-                                description = """
-                                    Добавляю в очередь ${track.stringWithUrl()}
-                                """.trimIndent()
-                            }
-                            musicManager.add(track, message.channel)
-                        }
-                        PLAYLIST_LOADED -> {
-                            val selectedTrack = result.playlistInfo.selectedTrack!!
-                            val tracks = result.tracks
-                                .drop(selectedTrack)
-                                .map { it.toAudioTrack() }
-                            message.channel.createEmbed {
-                                description = """
-                                    Загружен плейлист [${result.playlistInfo.name}](${result.tracks.first().info.uri})
-                                    Размер плейлиста: ${result.tracks.size} 
-                                    Список песень: ${tracks.joinToString("\n\t") { it.stringWithUrl() }}
-                                    """.trimIndent()
-                            }
-                            tracks.forEach { musicManager.add(it, message.channel)}
-                        }
-                        // In other cases throwing the exception
-                        else -> throw LoadException()
-                    }
+                    // Adding loaded track to music manager
+                    musicManager.add(result, message.channel)
                     // Connecting to the channel if you are not in it
                     if (link.channel == null)
                         link.connect(voiceChannel)
@@ -137,6 +114,10 @@ fun DiscordReceiver.music() {
                 val voiceChannel = message.authorsVoiceState()?.channelId ?: return@on message
                     .respond("Вы должны быть в голосовом канале")
 
+                musicManager.quittingJob = launch {
+                    delay(MusicManager.TIME_TO_DISCONNECT)
+                    link.disconnect()
+                }
                 link.connect(voiceChannel)
             }
             content == "выйди" -> {
@@ -171,6 +152,39 @@ fun DiscordReceiver.music() {
                 }
             }
         }
+    }
+}
+
+private suspend fun MusicManager.add(response: TrackResponse, channel: MessageChannelBehavior) {
+    when (response.loadType) {
+        // If it loaded adding it to the queue
+        TRACK_LOADED, SEARCH_RESULT -> {
+            val track = response.tracks.first().toAudioTrack()
+            channel.createEmbed {
+                description = """
+                                    Добавляю в очередь ${track.stringWithUrl()}
+                                """.trimIndent()
+            }
+            add(track, channel)
+        }
+        PLAYLIST_LOADED -> {
+            val selectedTrack = response.playlistInfo.selectedTrack!!
+            val tracks = response.tracks
+                .drop(selectedTrack)
+                .map { it.toAudioTrack() }
+            channel.createEmbed {
+                description = """
+                                    Загружен плейлист [${response.playlistInfo.name}](${response.tracks.first().info.uri})
+                                    Размер плейлиста: ${response.tracks.size} 
+                                    Список песень: ${tracks.joinToString("\n\t") { it.stringWithUrl() }}
+                                    """.trimIndent()
+            }
+            tracks.forEach {
+                add(it, channel)
+            }
+        }
+        // In other cases throwing the exception
+        else -> throw LoadException()
     }
 }
 
