@@ -9,15 +9,15 @@ import kotlinx.coroutines.flow.count
 fun DiscordReceiver.online() {
 
     on<MessageCreateEvent> {
-       if(message.content == "online"){
-           val guild = getGuild()!!
-           val onlineMembers = guild.members
-               .count { it.getPresence().status != Status.Offline }
+       if(message.author?.isBot == true || message.content != "online") return@on
 
-           message.channel.createMessage("""
-               Общее количество участников: ${guild.memberCount}
-               Онлайн: $onlineMembers
-               """.trimIndent())
-       }
+        val guild = getGuild()!!
+        val onlineMembers = guild.members
+            .count { (it.getPresenceOrNull()?.status ?: Status.Offline) != Status.Offline }
+
+        message.channel.createMessage("""
+                Общее количество участников: ${guild.memberCount}
+                Онлайн: $onlineMembers
+                """.trimIndent())
     }
 }
