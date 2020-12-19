@@ -4,6 +4,7 @@ import dev.kord.common.Color
 import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.event.message.MessageCreateEvent
+import kotlinx.coroutines.Job
 import me.plony.bot.utils.api.cubics.Dice
 import me.plony.bot.utils.api.cubics.compute
 import me.plony.bot.utils.globals.prefix
@@ -26,10 +27,20 @@ fun DiscordReceiver.cubics() {
                 description = "Результат: ${Dice(16).value}"
                 color = java.awt.Color.GRAY.kColor
             }.let {}
-        message.channel.createEmbed {
-            title = "Общий результат"
-            description = compute(query).toString()
-            color = Color(0, 255, 0)
+        try {
+            val job = Job()
+            val result = compute(query, job).eval().toString()
+            job.join()
+            message.channel.createEmbed {
+                title = "Общий результат"
+                description = result
+                color = Color(0, 255, 0)
+            }
+        } catch (e: Throwable) {
+            message.channel.createEmbed {
+                description = "Синтаксическая ошибка"
+                color = Color(255, 0, 0)
+            }
         }
     }
 }
