@@ -1,11 +1,11 @@
 package me.schlaubi.lavakord.audio
 
-import com.gitlab.kordlib.common.entity.Snowflake
-import com.gitlab.kordlib.core.Kord
-import com.gitlab.kordlib.core.event.channel.VoiceChannelDeleteEvent
-import com.gitlab.kordlib.core.event.gateway.DisconnectEvent
-import com.gitlab.kordlib.core.event.guild.GuildDeleteEvent
-import com.gitlab.kordlib.core.on
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.Kord
+import dev.kord.core.event.channel.VoiceChannelDeleteEvent
+import dev.kord.core.event.gateway.DisconnectEvent
+import dev.kord.core.event.guild.GuildDeleteEvent
+import dev.kord.core.on
 import kotlinx.coroutines.launch
 import lavalink.client.io.Lavalink
 import me.schlaubi.lavakord.KordLinkOptions
@@ -46,13 +46,13 @@ internal class KordLavaLink(
 
     private fun onLeave(event: GuildDeleteEvent) {
         if (!event.unavailable) {
-            linksMap[event.guildId.value]?.removeConnection()
+            linksMap[event.guildId.asString]?.removeConnection()
         }
     }
 
     private fun onChannelDeletion(event: VoiceChannelDeleteEvent) {
-        val link = linksMap[event.channel.guildId.value]
-        if (event.channel.id.value == link?.lastChannel) {
+        val link = linksMap[event.channel.guildId.asString]
+        if (event.channel.id.asString == link?.lastChannel) {
             link.removeConnection()
         }
     }

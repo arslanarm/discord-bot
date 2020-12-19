@@ -1,8 +1,8 @@
 
 package me.plony.bot
 
-import com.gitlab.kordlib.core.Kord
 import createServices
+import dev.kord.core.Kord
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 

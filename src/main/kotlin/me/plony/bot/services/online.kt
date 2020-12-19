@@ -1,21 +1,23 @@
-import com.gitlab.kordlib.common.entity.Status
+import dev.kord.common.entity.PresenceStatus
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
-import com.gitlab.kordlib.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.flow.count
+import me.plony.bot.utils.globals.prefix
+import me.plony.bot.utils.shortcuts.respond
 
 @Module
 fun DiscordReceiver.online() {
-
+    val prefix = "${prefix}онлайн"
     on<MessageCreateEvent> {
-        if(message.author?.isBot == true || message.content != "online") return@on
+        if(message.author?.isBot == true || message.content != prefix) return@on
 
-        val guild = getGuild()!!
-        val onlineMembers = guild.members
-            .count { (it.getPresenceOrNull()?.status ?: Status.Offline) != Status.Offline }
+        val guild = getGuild() ?: return@on message.respond("Вы сейчас находитесь не на сервере")
+        val onlineMembers = guild.presences
+            .count { it.status != PresenceStatus.Offline }
 
-        message.channel.createMessage("""
+        message.respond("""
                 Общее количество участников: ${guild.memberCount}
                 Онлайн: $onlineMembers
                 """.trimIndent())

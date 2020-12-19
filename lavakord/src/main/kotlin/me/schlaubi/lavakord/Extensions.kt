@@ -1,9 +1,8 @@
 package me.schlaubi.lavakord
 
-import com.gitlab.kordlib.common.entity.Snowflake
-import com.gitlab.kordlib.core.behavior.GuildBehavior
-import com.gitlab.kordlib.core.entity.Guild
-import com.gitlab.kordlib.core.entity.channel.VoiceChannel
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.GuildBehavior
+import dev.kord.core.entity.channel.VoiceChannel
 import lavalink.client.io.Lavalink
 import lavalink.client.io.Link
 import me.schlaubi.lavakord.audio.KordLink
@@ -13,7 +12,7 @@ import me.schlaubi.lavakord.audio.KordLink
  *
  * @see Lavalink.getLink
  */
-public fun <T : Link> Lavalink<T>.getLink(guildId: Snowflake): T = getLink(guildId.value)
+public fun <T : Link> Lavalink<T>.getLink(guildId: Snowflake): T = getLink(guildId.asString)
 
 /**
  * Creates or returns an existing [Link] for this [Guild] using the [lavalink] instance.

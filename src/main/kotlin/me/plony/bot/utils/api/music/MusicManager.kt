@@ -1,23 +1,16 @@
-package me.plony.bot.music
+package me.plony.bot.utils.api.music
 
-import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
-import com.gitlab.kordlib.core.behavior.channel.TextChannelBehavior
-import com.gitlab.kordlib.core.behavior.channel.createEmbed
-import com.gitlab.kordlib.core.entity.channel.TextChannel
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.channel.createEmbed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import lavalink.client.io.Link
-import lavalink.client.player.event.PlayerEvent
-import lavalink.client.player.event.PlayerPauseEvent
 import lavalink.client.player.event.TrackEndEvent
 import lavalink.client.player.event.TrackStartEvent
-import me.plony.bot.services.string
-import me.schlaubi.lavakord.audio.events
+import me.plony.bot.utils.shortcuts.string
 import me.schlaubi.lavakord.audio.on
 import kotlin.time.minutes
 

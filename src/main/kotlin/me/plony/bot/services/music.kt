@@ -1,20 +1,22 @@
 package me.plony.bot.services
 
-import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
-import com.gitlab.kordlib.core.behavior.channel.createEmbed
-import com.gitlab.kordlib.core.entity.Message
-import com.gitlab.kordlib.core.entity.channel.VoiceChannel
-import com.gitlab.kordlib.core.event.gateway.ReadyEvent
-import com.gitlab.kordlib.core.event.message.MessageCreateEvent
-import com.gitlab.kordlib.core.kordLogger
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.channel.createEmbed
+import dev.kord.core.entity.channel.VoiceChannel
+import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.kordLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lavalink.client.io.Link
-import me.plony.bot.music.GuildMusicManagers
-import me.plony.bot.music.MusicManager
+import me.plony.bot.utils.api.music.GuildMusicManagers
+import me.plony.bot.utils.api.music.MusicManager
+import me.plony.bot.utils.globals.prefix
+import me.plony.bot.utils.shortcuts.authorsVoiceState
+import me.plony.bot.utils.shortcuts.respond
+import me.plony.bot.utils.shortcuts.string
 import me.plony.processor.DiscordReceiver
-import me.plony.processor.Module
 import me.plony.processor.on
 import me.schlaubi.lavakord.connect
 import me.schlaubi.lavakord.lavalink
@@ -22,12 +24,8 @@ import me.schlaubi.lavakord.rest.TrackResponse
 import me.schlaubi.lavakord.rest.TrackResponse.LoadType.*
 import me.schlaubi.lavakord.rest.loadItem
 import java.net.URI
-import kotlin.time.milliseconds
 
-@Module
 fun DiscordReceiver.music() {
-    val prefix = "!"
-
     // Creating Lavalink instance
     val lavalink = kord.lavalink {
         autoReconnect = true
@@ -39,7 +37,7 @@ fun DiscordReceiver.music() {
     // Shortcut for getting guild's link
     suspend fun MessageCreateEvent.link(): Link? {
         val guildId = guildId ?: return message.respond("Сервер не найден").let { null }
-        return lavalink.getLink(guildId.value)
+        return lavalink.getLink(guildId.asString)
     }
 
     on<ReadyEvent> {
@@ -69,14 +67,13 @@ fun DiscordReceiver.music() {
             if (link.channel == null) return message
                 .respond("Я не в войсе").run { null }
             // Author is not in the voice channel
-            val voiceChannel = message.authorsVoiceState()?.getChannel() ?: return message
+            val voiceChannel = message.authorsVoiceState()?.getChannelOrNull() ?: return message
                 .respond("Вы должны быть в голосовом канале").run { null }
             // Bot and Author are in the different channels
-            if (link.channel != voiceChannel.id.value) return message
+            if (link.channel != voiceChannel.id.asString) return message
                 .respond("Вы должны быть в том же голосовом что и я").run { null }
             return voiceChannel
         }
-
         when {
             content.startsWith("сыграй") -> {
                 // Getting voice channel and checking is the member in the voice or not
@@ -85,7 +82,7 @@ fun DiscordReceiver.music() {
 
                 // Checking is the member in the same voice
                 if (link.channel != null
-                    && link.channel != voiceChannel.value) return@on message
+                    && link.channel != voiceChannel.asString) return@on message
                     .respond("Вы должны быть в том же голосовом что и я")
 
                 val query = content.removePrefix("сыграй").trim().run {
@@ -174,10 +171,10 @@ private suspend fun MusicManager.add(response: TrackResponse, channel: MessageCh
                 .map { it.toAudioTrack() }
             channel.createEmbed {
                 description = """
-                                    Загружен плейлист [${response.playlistInfo.name}](${response.tracks.first().info.uri})
-                                    Размер плейлиста: ${response.tracks.size} 
-                                    Список песень: ${tracks.joinToString("\n\t") { it.stringWithUrl() }}
-                                    """.trimIndent()
+                    Загружен плейлист [${response.playlistInfo.name}](${response.tracks.first().info.uri})
+                    Размер плейлиста: ${response.tracks.size} 
+                    Список песень: ${tracks.joinToString("\n\t") { it.stringWithUrl() }}
+                """.trimIndent()
             }
             tracks.forEach {
                 add(it, channel)
@@ -190,15 +187,4 @@ private suspend fun MusicManager.add(response: TrackResponse, channel: MessageCh
 
 class LoadException : Exception()
 
-fun AudioTrack.stringWithUrl() = "[${string()}](${info.uri})"
-
-fun AudioTrack.string() = with(info){
-    "$author - $title: ${
-        duration.milliseconds.toComponents { hours, minutes, seconds, _ -> 
-            "Длительность ${if (hours > 0) "$hours:" else ""}${minutes.withZero()}:${seconds.withZero()}" 
-        }
-    }"
-}
-fun Int.withZero() = if (this > 9) "$this" else "0$this"
-suspend fun Message.authorsVoiceState() = getAuthorAsMember()?.getVoiceStateOrNull()
-suspend fun Message.respond(message: String) = channel.createMessage(message).let{}
+private fun AudioTrack.stringWithUrl() = "[${string()}](${info.uri})"

@@ -1,6 +1,7 @@
 package me.plony.bot
 
-import com.gitlab.kordlib.core.Kord
+
+import dev.kord.core.Kord
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.response.*

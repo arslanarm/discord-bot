@@ -1,6 +1,7 @@
 package me.schlaubi.lavakord
 
-import com.gitlab.kordlib.core.Kord
+
+import dev.kord.core.Kord
 import lavalink.client.io.Lavalink
 import lavalink.client.io.Link
 import me.schlaubi.lavakord.audio.KordLavaLink
@@ -16,7 +17,7 @@ public fun Kord.lavalink(configure: MutableKordLinkOptions.() -> Unit = {}): Lav
     return KordLavaLink(
         this,
         options,
-        selfId.value,
+        selfId.asString,
         resources.shardCount
     )
 }

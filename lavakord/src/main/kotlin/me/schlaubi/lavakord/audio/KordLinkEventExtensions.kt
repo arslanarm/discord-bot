@@ -1,6 +1,5 @@
 package me.schlaubi.lavakord.audio
 
-import com.gitlab.kordlib.core.Kord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel

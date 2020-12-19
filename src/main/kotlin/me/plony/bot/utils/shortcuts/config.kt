@@ -1,4 +1,4 @@
-package me.plony.bot.utils
+package me.plony.bot.utils.shortcuts
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json

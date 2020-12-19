@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     implementation("com.gitlab.kordlib:kordx.emoji:0.4.0")
-    implementation("com.gitlab.kordlib.kord:kord-core:0.6.10")
+    implementation("dev.kord:kord-core:0.7.0-RC")
     implementation(project(":lavakord"))
 
     implementation("io.ktor:ktor-client-cio:1.4.3")
@@ -68,6 +68,7 @@ tasks.withType<KotlinCompile>() {
         "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
         "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
         "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-        "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
+        "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
+        "-Xopt-in=dev.kord.common.annotation.KordPreview"
     )
 }

@@ -1,9 +1,14 @@
 package me.plony.processor
 
-import com.gitlab.kordlib.core.Kord
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import dev.kord.core.Kord
+import dev.kord.core.behavior.channel.createEmbed
+import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.on
 import me.plony.processor.dsl.code
 import me.plony.processor.dsl.fileSpec
 import me.plony.processor.dsl.function
@@ -17,7 +22,7 @@ import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class Module
+annotation class Module(val help: String = "")
 
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedAnnotationTypes("me.plony.processor.Module")
@@ -41,10 +46,28 @@ class AnnotationProcessor : AbstractProcessor() {
             elements.forEach {
                 addImport(utils.getPackageOf(it).qualifiedName.toString(), it.simpleName.toString())
             }
+            addImport("dev.kord.core", "on")
+            addImport("dev.kord.core.behavior.channel", "createEmbed")
+            import(MessageCreateEvent::class)
             function("createServices") {
                 receiver(Kord::class)
                 returns(ServiceManager::class)
                 code("""
+                    on<MessageCreateEvent> {
+                        if (message.author?.isBot == true || message.content != "+help") return@on
+                        
+                        message.channel.createEmbed {
+                            title = "Help"
+                            description = "Modules: \n${
+                                elements.filter { 
+                                    it.getAnnotation(Module::class.java).help.isNotBlank()
+                                }.joinToString("\\n") { element ->
+                                    val annotation = element.getAnnotation(Module::class.java)
+                                    "\\t${element.simpleName.toString().capitalize()}: ${annotation.help}"
+                                }
+                            }"
+                        }
+                    }
                     val serviceManager = ServiceManager()
                     val services = listOf(
                         ${

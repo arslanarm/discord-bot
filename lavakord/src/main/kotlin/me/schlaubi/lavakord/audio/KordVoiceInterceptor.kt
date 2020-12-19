@@ -1,8 +1,9 @@
 package me.schlaubi.lavakord.audio
 
-import com.gitlab.kordlib.core.event.VoiceServerUpdateEvent
-import com.gitlab.kordlib.core.event.VoiceStateUpdateEvent
-import com.gitlab.kordlib.core.on
+
+import dev.kord.core.event.guild.VoiceServerUpdateEvent
+import dev.kord.core.event.user.VoiceStateUpdateEvent
+import dev.kord.core.on
 import lavalink.client.io.Link
 import org.json.JSONObject
 
@@ -21,15 +22,15 @@ internal class KordVoiceInterceptor(private val lavalink: KordLavaLink) {
             .put("guild_id", guild.id.value)
             .put("endpoint", event.endpoint)
 
-        lavalink.getLink(guild.id.value).onVoiceServerUpdate(
+        lavalink.getLink(guild.id.asString).onVoiceServerUpdate(
             json,
             guild.getMember(lavalink.client.selfId).getVoiceState().sessionId
         )
     }
 
     private suspend fun handleVoiceStateUpdate(event: VoiceStateUpdateEvent) {
-        val channel = event.state.getChannel()
-        val link = event.state.guildId?.let { lavalink.getLink(it.value) } ?: error("Missing guild id")
+        val channel = event.state.getChannelOrNull()
+        val link = event.state.guildId.let { lavalink.getLink(it.asString) }
 
         // Null channel means disconnected
         if (channel == null) {
@@ -37,7 +38,7 @@ internal class KordVoiceInterceptor(private val lavalink: KordLavaLink) {
                 link.onDisconnected()
             }
         } else {
-            link.setChannel(channel.id.value)
+            link.setChannel(channel.id.asString)
         }
     }
 }

@@ -1,8 +1,8 @@
 package me.plony.bot.services
 
-import com.gitlab.kordlib.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.serialization.Serializable
-import me.plony.bot.utils.readConfig
+import me.plony.bot.utils.shortcuts.readConfig
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on

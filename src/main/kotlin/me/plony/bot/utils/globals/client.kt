@@ -1,4 +1,4 @@
-package me.plony.bot.utils
+package me.plony.bot.utils.globals
 
 import io.ktor.client.*
 import io.ktor.client.features.json.*

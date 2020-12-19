@@ -1,6 +1,6 @@
 package me.schlaubi.lavakord
 
-import com.gitlab.kordlib.common.entity.Permission
+import dev.kord.common.entity.Permission
 import lavalink.client.io.Link
 import me.schlaubi.lavakord.rest.addressStatus
 

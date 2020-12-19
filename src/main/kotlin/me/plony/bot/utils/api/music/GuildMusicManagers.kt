@@ -1,6 +1,6 @@
-package me.plony.bot.music
+package me.plony.bot.utils.api.music
 
-import com.gitlab.kordlib.common.entity.Snowflake
+import dev.kord.common.entity.Snowflake
 import kotlinx.coroutines.CoroutineScope
 import lavalink.client.io.Link
 

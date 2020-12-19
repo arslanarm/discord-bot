@@ -1,9 +1,8 @@
 package me.plony.processor
 
-
-import com.gitlab.kordlib.core.Kord
-import com.gitlab.kordlib.core.event.Event
-import com.gitlab.kordlib.core.on
+import dev.kord.core.Kord
+import dev.kord.core.event.Event
+import dev.kord.core.on
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext

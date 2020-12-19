@@ -1,12 +1,13 @@
 package me.schlaubi.lavakord.audio
 
-import com.gitlab.kordlib.common.entity.Permission
-import com.gitlab.kordlib.common.entity.Snowflake
-import com.gitlab.kordlib.core.Kord
-import com.gitlab.kordlib.core.entity.Guild
-import com.gitlab.kordlib.core.entity.channel.VoiceChannel
-import com.gitlab.kordlib.gateway.Gateway
-import com.gitlab.kordlib.gateway.UpdateVoiceStatus
+import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.optional.OptionalLong
+import dev.kord.core.Kord
+import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.VoiceChannel
+import dev.kord.gateway.Gateway
+import dev.kord.gateway.UpdateVoiceStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -61,10 +62,10 @@ internal class KordLink(internal val lavalink: KordLavaLink, guildId: String?) :
         lavalink.client.launch {
             val guild = lavalink.client.getGuild(Snowflake(guildIdLong)) ?: error("Could not find Guild $guildId")
 
-            guild.gateway.send(
+            guild.localGateway.send(
                 UpdateVoiceStatus(
-                    guildId,
-                    null,
+                    Snowflake(guildIdLong),
+                    Snowflake(-1),
                     selfMute = false,
                     selfDeaf = false
                 )
@@ -75,9 +76,10 @@ internal class KordLink(internal val lavalink: KordLavaLink, guildId: String?) :
     override fun queueAudioConnect(channelId: Long) {
         lavalink.client.launch {
             val channel = lavalink.client.getChannel(Snowflake(channelId)) as VoiceChannel
-            channel.getGuild().gateway.send(
+            channel.getGuild().localGateway.send(
                 UpdateVoiceStatus(
-                    guildId, channel.id.value,
+                    Snowflake(guildIdLong),
+                    channel.id,
                     selfMute = false,
                     selfDeaf = false
                 )
@@ -88,7 +90,7 @@ internal class KordLink(internal val lavalink: KordLavaLink, guildId: String?) :
     suspend fun connect(channelId: Long, checkChannel: Boolean = true) {
         val channel = lavalink.client.getChannel(Snowflake(channelId)) as? VoiceChannel
         requireNotNull(channel) { "channelId must be the valid id of a voice channel" }
-        require(channel.guildId.value == guildId) {
+        require(channel.guildId.asString == guildId) {
             "The provided VoiceChannel is not a part of the Guild that this AudioManager handles. Please provide a VoiceChannel from the proper Guild"
         }
         val permissions = channel.getEffectivePermissions(lavalink.client.selfId)
@@ -119,9 +121,9 @@ internal class KordLink(internal val lavalink: KordLavaLink, guildId: String?) :
     }
 }
 
-private val Guild.gateway: Gateway
+private val Guild.localGateway: Gateway
     get() = kord.gateway.gateways[gatewayId] ?: error("Could not find guild gateway")
 
 // https://discord.com/developers/docs/topics/gateway#sharding-sharding-formula
 private val Guild.gatewayId: Int
-    get() = ((id.longValue shl 22) % kord.resources.shardCount).toInt()
+    get() = ((id.value shl 22) % kord.resources.shardCount).toInt()
