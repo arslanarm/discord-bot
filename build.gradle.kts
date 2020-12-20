@@ -45,6 +45,8 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://jitpack.io")
+        maven("http://nexus.devsrsouza.com.br/repository/maven-public/")
+        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots")
         maven("https://dl.bintray.com/kordlib/Kord")
         jcenter()
     }
