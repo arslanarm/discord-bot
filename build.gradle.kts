@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.4.21"
     kotlin("plugin.serialization") version "1.4.21"
     kotlin("kapt") version "1.4.21"
+    application
 }
 
 group = "me.plony"
@@ -71,4 +72,8 @@ tasks.withType<KotlinCompile>() {
         "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
         "-Xopt-in=dev.kord.common.annotation.KordPreview"
     )
+}
+
+application {
+    mainClassName = "me.plony.bot.MainKt"
 }
