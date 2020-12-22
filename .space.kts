@@ -13,7 +13,7 @@ job("Build and Publish") {
         env["BOT_TOKEN"] = Secrets("token")
         env["REPOSITORY"] = "mana-renewal.registry.jetbrains.space/p/discord-bot/discord-bot/myimage"
         env["TAG"] = tag
-        env["NAME"] = "discord-bot"
+        env["NAME"] = "plony/discord-bot"
 
         shellScript {
             content = "python3 /app/upload.py"
