@@ -1,6 +1,6 @@
 
 job("Build and Publish") {
-    val tag = "v1"
+    val tag = "latest"
     docker {
         build {}
         push("mana-renewal.registry.jetbrains.space/p/discord-bot/discord-bot/myimage") {
@@ -13,7 +13,7 @@ job("Build and Publish") {
         env["BOT_TOKEN"] = Secrets("token")
         env["REPOSITORY"] = "mana-renewal.registry.jetbrains.space/p/discord-bot/discord-bot/myimage"
         env["TAG"] = tag
-        env["NAME"] = "plony/discord-bot"
+        env["NAME"] = "myimage"
 
         shellScript {
             content = "python3 /app/upload.py"
