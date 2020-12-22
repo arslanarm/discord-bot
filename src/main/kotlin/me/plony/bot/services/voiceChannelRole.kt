@@ -16,7 +16,7 @@ import me.plony.processor.on
 @Module
 fun DiscordReceiver.voiceChannelRole() {
     @Serializable
-    data class Config(val guild: Long, val roleId: Long)
+    data class Config(val guild: String, val roleId: String)
     val config = readConfig(Config.serializer(), "data/voiceChanelRole", "config.json")
     val roleSnowflake = Snowflake(config.roleId)
     on<ReadyEvent> {
@@ -37,7 +37,7 @@ fun DiscordReceiver.voiceChannelRole() {
     }
 
     on<VoiceStateUpdateEvent> {
-        if (state.guildId.value != config.guild) return@on
+        if (state.guildId.asString != config.guild) return@on
         if (state.channelId != null) {
             val member = state.getMember()
             if (roleSnowflake in member.roleIds) {
