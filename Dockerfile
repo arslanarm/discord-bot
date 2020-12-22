@@ -1,2 +1,3 @@
 FROM openjdk
-CMD ./gradlew run
+COPY . /app
+CMD /app/gradlew run
