@@ -82,7 +82,8 @@ fun DiscordReceiver.music() {
 
                 // Checking is the member in the same voice
                 if (link.channel != null
-                    && link.channel != voiceChannel.asString) return@on message
+                    && link.channel != voiceChannel.asString
+                ) return@on message
                     .respond("Вы должны быть в том же голосовом что и я")
 
                 val query = content.removePrefix("сыграй").trim().run {
@@ -144,7 +145,10 @@ fun DiscordReceiver.music() {
                 message.channel.createEmbed {
                     description = """
                         Очередь: ${link.player.playingTrack?.stringWithUrl()}
-                            ${musicManager.queue.withIndex().joinToString("\n\t") { (index, it) -> "${index + 1}) ${it.stringWithUrl()}" }}
+                            ${
+                        musicManager.queue.withIndex()
+                            .joinToString("\n\t") { (index, it) -> "${index + 1}) ${it.stringWithUrl()}" }
+                    }
                     """.trimIndent()
                 }
             }

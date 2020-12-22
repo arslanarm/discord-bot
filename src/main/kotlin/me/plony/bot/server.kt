@@ -4,6 +4,7 @@ package me.plony.bot
 import dev.kord.core.Kord
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
@@ -22,6 +23,7 @@ fun Kord.server(port: Int, serviceManager: ServiceManager, wait: Boolean = false
             }
             get("reload") {
                 serviceManager.restartAll()
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

@@ -5,9 +5,9 @@ import dev.kord.common.entity.Permissions
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.editMemberPermission
 import dev.kord.core.behavior.createVoiceChannel
+import dev.kord.core.entity.channel.VoiceChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
-import dev.kord.rest.builder.channel.VoiceChannelCreateBuilder
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,7 +22,13 @@ import me.plony.processor.on
 @Module
 fun DiscordReceiver.privateChannels() {
     @Serializable
-    data class Config(val guild: String, val creatorChannel: String, val creatingCategory: String, val defaultChannels: List<String>)
+    data class Config(
+        val guild: String,
+        val creatorChannel: String,
+        val creatingCategory: String,
+        val defaultChannels: List<String>
+    )
+
     val configs = readConfig(ListSerializer(Config.serializer()), "data/privateChannels", "config.json")
 
     configs.forEach { config ->
@@ -30,6 +36,7 @@ fun DiscordReceiver.privateChannels() {
         on<ReadyEvent> {
             kord.getGuild(Snowflake(config.guild))!!
                 .channels
+                .filterIsInstance<VoiceChannel>()
                 .filter { it.data.parentId?.value == Snowflake(config.creatingCategory) }
                 .onEach {
                     if (it.id.asString !in config.defaultChannels)
