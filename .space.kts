@@ -16,7 +16,7 @@ job("Build and Publish") {
         env["NAME"] = "discord-bot"
 
         shellScript {
-            content = "python3 upload.py"
+            content = "python3 /app/upload.py"
         }
     }
 }
