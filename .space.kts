@@ -1,5 +1,11 @@
 
 job("Build and Publish") {
+    startOn {
+        gitPush {
+            branchFilter = "main"
+        }
+    }
+
     val tag = "latest"
     docker {
         build {}
