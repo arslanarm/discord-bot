@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.bukkit.ChatColor
 import java.awt.Color
 import java.io.File
 
@@ -42,7 +43,7 @@ class DiscordPlugin : KotlinPlugin() {
                         for (messageFrame in incoming) {
                             val messageString = messageFrame.readBytes().decodeToString()
                             val message = Json.decodeFromString(MinecraftMessage.serializer(), messageString)
-                            server.broadcastMessage("&3Discord: [${message.author}] ${message.content}")
+                            server.broadcastMessage("&3Discord: <#${message.color.toHex()}>[${message.author}] &3${message.content}")
                         }
                     }
                     for (message in output) {
@@ -64,6 +65,7 @@ class DiscordPlugin : KotlinPlugin() {
     data class MinecraftMessage(val author: String, val content: String, val color: Color)
     @Serializable
     data class Color(val r: Int, val g: Int, val b: Int)
+    fun Color.toHex() = "${r.toString(16)}${g.toString(16)}${g.toString(16)}"
     fun encodeStringToColor(author: String): Color {
         val r = author.encodeToByteArray().sum() % 256
         val g = author.encodeOAuth().encodeToByteArray().sum() % 256
