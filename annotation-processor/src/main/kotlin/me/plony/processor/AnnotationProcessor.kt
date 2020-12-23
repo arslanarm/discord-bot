@@ -1,14 +1,7 @@
 package me.plony.processor
 
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
 import dev.kord.core.Kord
-import dev.kord.core.behavior.channel.createEmbed
-import dev.kord.core.entity.Message
-import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.core.on
 import me.plony.processor.dsl.code
 import me.plony.processor.dsl.fileSpec
 import me.plony.processor.dsl.function
@@ -16,8 +9,6 @@ import me.plony.processor.dsl.import
 import java.io.File
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
@@ -31,12 +22,16 @@ class AnnotationProcessor : AbstractProcessor() {
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
+
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         val utils = processingEnv.elementUtils
         val elements = roundEnv.getElementsAnnotatedWith(Module::class.java)
         if (elements.isEmpty()) return false
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME] ?: run {
-            processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, "Can't find the target directory for generated Kotlin files.")
+            processingEnv.messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Can't find the target directory for generated Kotlin files."
+            )
             return false
         }
 
@@ -53,28 +48,32 @@ class AnnotationProcessor : AbstractProcessor() {
                 receiver(Kord::class)
                 returns(ServiceManager::class)
                 code("""
+                    val helpMessages = listOf(
+                    ${
+                        elements.filter {
+                            it.getAnnotation(Module::class.java).help.isNotBlank()
+                        }.joinToString("\n,") { element ->
+                            val annotation = element.getAnnotation(Module::class.java)
+                            "\t\"\"\"${element.simpleName.toString().capitalize()}: ${annotation.help}\"\"\""
+                        }
+                    }
+                    )
                     on<MessageCreateEvent> {
                         if (message.author?.isBot == true || message.content != "+help") return@on
                         
+                        
                         message.channel.createEmbed {
                             title = "Help"
-                            description = "Описание модулей: \n${
-                                elements.filter { 
-                                    it.getAnnotation(Module::class.java).help.isNotBlank()
-                                }.joinToString("\\n") { element ->
-                                    val annotation = element.getAnnotation(Module::class.java)
-                                    "\\t${element.simpleName.toString().capitalize()}: ${annotation.help}"
-                                }
-                            }"
+                            description = "Описание модулей: \n" + helpMessages.joinToString("\n") { "\t" + it }
                         }
                     }
                     val serviceManager = ServiceManager()
                     val services = listOf(
                         ${
-                            elements.joinToString(",\n") { 
-                                "Service(newDiscordReceiver(), \"${it.simpleName}\") { ${it.simpleName}() }"
-                            }
-                        }
+                    elements.joinToString(",\n") {
+                        "Service(newDiscordReceiver(), \"${it.simpleName}\") { ${it.simpleName}() }"
+                    }
+                }
                     )
                     serviceManager.addAll(services)
                     serviceManager.executeAll()

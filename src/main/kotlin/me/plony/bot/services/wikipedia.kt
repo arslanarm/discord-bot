@@ -26,7 +26,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 
 
-@Module("Модуль дающий возможность получить краткую информацию из википедии. Команда: %prefix%википедия %query%")
+@Module("Модуль дающий возможность получить краткую информацию из википедии. Команда: <prefix>википедия <query>")
 fun DiscordReceiver.wikipedia() {
     val localPrefix = "${prefix}википедия "
     on<MessageCreateEvent> {

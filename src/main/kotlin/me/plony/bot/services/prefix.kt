@@ -6,10 +6,10 @@ import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
 
-@Module("Модуль дающий возможность посмотреть на текущий префикс")
+@Module("Модуль дающий возможность посмотреть на текущий префикс. Команда: +префикс")
 fun DiscordReceiver.prefixShower() {
     on<MessageCreateEvent> {
-        if (message.author?.isBot == true || message.content != "${prefix}префикс") return@on
+        if (message.author?.isBot == true || message.content != "+префикс") return@on
         message.channel.createMessage("Нынешний префикс: $prefix")
     }
 }

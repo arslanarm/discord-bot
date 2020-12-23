@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.count
 import me.plony.bot.utils.globals.prefix
 import me.plony.bot.utils.shortcuts.respond
 
-@Module("Модуль дающий возможность посмотреть на онлайн сервера. Команда: %prefix%онлайн")
+@Module("Модуль дающий возможность посмотреть на онлайн сервера. Команда: <prefix>онлайн")
 fun DiscordReceiver.online() {
     val prefix = "${prefix}онлайн"
     on<MessageCreateEvent> {
