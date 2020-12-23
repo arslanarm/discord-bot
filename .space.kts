@@ -2,7 +2,9 @@
 job("Build and Publish") {
     startOn {
         gitPush {
-            branchFilter = "main"
+            branchFilter {
+                +"refs/heads/main"
+            }
         }
     }
 
