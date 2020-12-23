@@ -5,6 +5,9 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.live.channel.live
+import dev.kord.core.live.on
 import io.ktor.client.features.websocket.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
@@ -28,13 +31,21 @@ fun DiscordReceiver.minecraftChat() {
     data class Config(val url: String, val guild: String, val channel: String)
 
     val config = readConfig(Config.serializer(), "data/minecraftChat", "config.json")
-    val output = Channel<MinecraftMessage>(Int.MAX_VALUE)
+
     on<ReadyEvent> {
         while(true) {
             try {
                 coroutineScope {
+                    val output = Channel<MinecraftMessage>(Int.MAX_VALUE)
                     val guild = kord.getGuild(Snowflake(config.guild))!!
                     val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
+                    channel.live()
+                        .on<MessageCreateEvent>(this) messages@{
+                            val author = it.message.author?.run { "$username#$discriminator" } ?: return@messages
+                            val message = it.message.content
+                            output.send(MinecraftMessage(author, message))
+                        }
+
                     client.webSocket(config.url) {
                         launch {
                             for (message in output) {
@@ -65,7 +76,6 @@ fun DiscordReceiver.minecraftChat() {
             delay(5.seconds)
         }
     }
-
 }
 
 
