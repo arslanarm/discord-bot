@@ -31,10 +31,14 @@ fun DiscordReceiver.minecraftChat() {
             val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
             launch {
                 client.webSocket(config.url) {
-                    for (messageString in incoming) {
+                    for (messageFrame in incoming) {
+                        val messageString = messageFrame
+                            .readBytes()
+                            .decodeToString()
+                            .replace(Regex("&[0-9a-fk-or]"), "")
                         val message = Json.decodeFromString(
                             MinecraftMessage.serializer(),
-                            messageString.readBytes().decodeToString()
+                            messageString
                         )
                         channel.createEmbed {
                             description = message.content
