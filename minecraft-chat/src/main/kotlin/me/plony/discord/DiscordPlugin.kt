@@ -4,6 +4,7 @@ import br.com.devsrsouza.kotlinbukkitapi.architecture.KotlinPlugin
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.event
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.events
 import de.jeter.chatex.api.events.PlayerUsesGlobalChatEvent
+import de.jeter.chatex.api.events.PlayerUsesRangeModeEvent
 import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
@@ -33,8 +34,14 @@ class DiscordPlugin : KotlinPlugin() {
             install(WebSockets)
             routing {
                 webSocket {
+                    launch {
+                        for (messageFrame in incoming) {
+                            val messageString = messageFrame.readBytes().decodeToString()
+                            val message = Json.decodeFromString(MinecraftMessage.serializer(), messageString)
+                            server.consoleSender.sendMessage("&3Discord: [${message.author}] ${message.content}")
+                        }
+                    }
                     for (message in output) {
-                        println(message)
                         val json = Json.encodeToString(MinecraftMessage.serializer(), message)
                         outgoing.send(Frame.Text(json))
                     }
@@ -43,8 +50,7 @@ class DiscordPlugin : KotlinPlugin() {
         }.start(wait = false)
 
         events {
-            event<PlayerUsesGlobalChatEvent> {
-                println("${player.name} $message")
+            event<PlayerUsesRangeModeEvent> {
                 GlobalScope.launch { output.send(MinecraftMessage(player.name, message)) }
             }
         }
