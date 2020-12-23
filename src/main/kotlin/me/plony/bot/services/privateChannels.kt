@@ -39,7 +39,7 @@ fun DiscordReceiver.privateChannels() {
                 .filterIsInstance<VoiceChannel>()
                 .filter { it.data.parentId?.value == Snowflake(config.creatingCategory) }
                 .onEach {
-                    if (it.id.asString !in config.defaultChannels)
+                    if (it.id.asString !in config.defaultChannels && it.voiceStates.count() == 0)
                         it.delete()
                 }
                 .collect()

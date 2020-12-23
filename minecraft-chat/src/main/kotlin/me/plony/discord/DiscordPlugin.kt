@@ -3,6 +3,7 @@ package me.plony.discord
 import br.com.devsrsouza.kotlinbukkitapi.architecture.KotlinPlugin
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.event
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.events
+import br.com.devsrsouza.kotlinbukkitapi.extensions.text.plus
 import de.jeter.chatex.api.ChatExAPI
 import de.jeter.chatex.api.events.PlayerUsesGlobalChatEvent
 import de.jeter.chatex.api.events.PlayerUsesRangeModeEvent
@@ -22,6 +23,7 @@ import kotlinx.serialization.json.Json
 import org.bukkit.ChatColor
 import java.awt.Color
 import java.io.File
+import kotlin.math.abs
 
 
 class DiscordPlugin : KotlinPlugin() {
@@ -43,7 +45,10 @@ class DiscordPlugin : KotlinPlugin() {
                         for (messageFrame in incoming) {
                             val messageString = messageFrame.readBytes().decodeToString()
                             val message = Json.decodeFromString(MinecraftMessage.serializer(), messageString)
-                            server.broadcastMessage("&3Discord: <#${message.color.toHex()}>[${message.author}] &3${message.content}")
+                            server.broadcastMessage(
+                                ChatColor.AQUA + "Discord: " + message.color.toChatColor() + "[${message.author}] "
+                                        + ChatColor.AQUA + message.content
+                            )
                         }
                     }
                     for (message in output) {
@@ -65,8 +70,36 @@ class DiscordPlugin : KotlinPlugin() {
     data class MinecraftMessage(val author: String, val content: String, val color: Color)
     @Serializable
     data class Color(val r: Int, val g: Int, val b: Int)
-    fun Color.toHex() = "${r.toString(16)}${g.toString(16)}${g.toString(16)}"
-    fun encodeStringToColor(author: String): Color {
+    private fun Color.toChatColor() = ChatColor.values()
+            .filter { it.isColor }
+            .minByOrNull { abs(it.hsb().hue - hsb().hue) }!!
+
+    private fun Color.hsb(): HSB {
+        val hsb = java.awt.Color.RGBtoHSB(r, g, b, null)
+        return HSB(hsb[0].toDouble(), hsb[1].toDouble(), hsb[2].toDouble())
+    }
+    data class HSB(val hue: Double, val saturation: Double, val brightness: Double)
+    private val chatColorNameToColor = mapOf(
+        ChatColor.AQUA to Color(85, 255, 255),
+        ChatColor.BLACK to Color(0, 0, 0),
+        ChatColor.BLUE to Color(85, 85, 255),
+        ChatColor.DARK_AQUA to Color(0, 170, 170),
+        ChatColor.DARK_BLUE to Color(0, 0, 170),
+        ChatColor.DARK_GRAY to Color(85, 85, 85),
+        ChatColor.DARK_GREEN to Color(0, 170, 0),
+        ChatColor.DARK_PURPLE to Color(170, 0, 170),
+        ChatColor.DARK_RED to Color(170, 0, 0),
+        ChatColor.GOLD to Color(255, 170, 0),
+        ChatColor.GRAY to Color(170, 170, 170),
+        ChatColor.GREEN to Color(85, 255, 85),
+        ChatColor.LIGHT_PURPLE to Color(255, 85, 255),
+        ChatColor.RED to Color(255, 85, 85),
+        ChatColor.WHITE to Color(255, 255, 255),
+        ChatColor.YELLOW to Color(255, 255, 85)
+    )
+    private fun ChatColor.hsb() = chatColorNameToColor[this]!!.hsb()
+
+    private fun encodeStringToColor(author: String): Color {
         val r = author.encodeToByteArray().sum() % 256
         val g = author.encodeOAuth().encodeToByteArray().sum() % 256
         val b = author.encodeBase64().encodeToByteArray().sum() % 256
