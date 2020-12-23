@@ -40,9 +40,15 @@ fun DiscordReceiver.voiceChannelRole() {
         if (state.guildId.asString != config.guild) return@on
         if (state.channelId != null) {
             val member = state.getMember()
-            if (roleSnowflake in member.roleIds) {
+            if (roleSnowflake !in member.roleIds) {
                 member.addRole(roleSnowflake)
             }
+        } else {
+            val member = state.getMember()
+            if (roleSnowflake in member.roleIds) {
+                member.removeRole(roleSnowflake)
+            }
         }
+
     }
 }
