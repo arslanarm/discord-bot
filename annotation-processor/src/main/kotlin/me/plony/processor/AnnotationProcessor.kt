@@ -58,7 +58,7 @@ class AnnotationProcessor : AbstractProcessor() {
                         
                         message.channel.createEmbed {
                             title = "Help"
-                            description = "Modules: \n${
+                            description = "Описание модулей: \n${
                                 elements.filter { 
                                     it.getAnnotation(Module::class.java).help.isNotBlank()
                                 }.joinToString("\\n") { element ->

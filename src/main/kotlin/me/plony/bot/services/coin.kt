@@ -6,7 +6,7 @@ import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
 
-@Module
+@Module("Модуль дающий возможность бросить монетку. Команда: %prefix%монетка")
 fun DiscordReceiver.coin(){
     on<MessageCreateEvent> {
         if (message.author?.isBot == true || message.content != "${prefix}монетка") return@on

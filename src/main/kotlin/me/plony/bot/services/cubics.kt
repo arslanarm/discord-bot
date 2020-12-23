@@ -12,7 +12,7 @@ import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
 
-@Module
+@Module("Модуль дающий возможность бросить кубики. Команда: %prefix%кубики %expression%")
 fun DiscordReceiver.cubics() {
     val localPrefix = "${prefix}кубики"
 
