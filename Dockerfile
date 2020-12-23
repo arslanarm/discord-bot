@@ -1,3 +1,4 @@
 FROM openjdk
-COPY . /app
+WORKDIR /app
+COPY . .
 CMD /app/gradlew run
