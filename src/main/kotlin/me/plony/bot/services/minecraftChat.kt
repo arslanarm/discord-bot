@@ -35,7 +35,7 @@ fun DiscordReceiver.minecraftChat() {
                         val messageString = messageFrame
                             .readBytes()
                             .decodeToString()
-                            .replace(Regex("&[0-9a-fk-or]"), "")
+                            .replace(Regex("§[0-9a-fk-or]"), "")
                         val message = Json.decodeFromString(
                             MinecraftMessage.serializer(),
                             messageString
