@@ -9,6 +9,7 @@ import io.ktor.client.features.websocket.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.util.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -17,6 +18,7 @@ import me.plony.bot.utils.shortcuts.readConfig
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
+import kotlin.time.seconds
 
 @Module
 fun DiscordReceiver.minecraftChat() {
@@ -26,10 +28,11 @@ fun DiscordReceiver.minecraftChat() {
     val config = readConfig(Config.serializer(), "data/minecraftChat", "config.json")
 
     on<ReadyEvent> {
-        try {
-            val guild = kord.getGuild(Snowflake(config.guild))!!
-            val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
-            launch {
+        while(true) {
+            try {
+                val guild = kord.getGuild(Snowflake(config.guild))!!
+                val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
+
                 client.webSocket(config.url) {
                     for (messageFrame in incoming) {
                         val messageString = messageFrame
@@ -47,9 +50,10 @@ fun DiscordReceiver.minecraftChat() {
                         }
                     }
                 }
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
-        } catch (e: Throwable) {
-            e.printStackTrace()
+            delay(5.seconds)
         }
     }
 
