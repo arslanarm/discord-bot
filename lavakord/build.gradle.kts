@@ -6,5 +6,14 @@ dependencies {
     compileOnly("dev.kord", "kord-core", "0.7.0-RC")
 
     api("com.github.FredBoat", "Lavalink-Client", "4.0")
+}
 
+tasks {
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = listOf(
+                "-Xopt-in=kotlin.RequiresOptIn"
+            )
+        }
+    }
 }

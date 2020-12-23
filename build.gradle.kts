@@ -46,6 +46,8 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://jitpack.io")
+        maven("http://nexus.devsrsouza.com.br/repository/maven-public/")
+        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots")
         maven("https://dl.bintray.com/kordlib/Kord")
         jcenter()
     }
@@ -70,7 +72,8 @@ tasks.withType<KotlinCompile>() {
         "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
         "-Xopt-in=kotlin.contracts.ExperimentalContracts",
         "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
-        "-Xopt-in=dev.kord.common.annotation.KordPreview"
+        "-Xopt-in=dev.kord.common.annotation.KordPreview",
+        "-Xopt-in=io.ktor.util.InternalAPI"
     )
 }
 
