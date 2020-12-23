@@ -41,6 +41,7 @@ fun DiscordReceiver.minecraftChat() {
                     val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
                     channel.live()
                         .on<MessageCreateEvent>(this) messages@{
+                            if (it.message.author?.isBot == true) return@messages
                             val author = it.message.author?.run { "$username#$discriminator" } ?: return@messages
                             val message = it.message.content
                             output.send(MinecraftMessage(author, message))
