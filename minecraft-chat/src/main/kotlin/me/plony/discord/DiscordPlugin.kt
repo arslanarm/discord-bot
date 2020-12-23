@@ -11,17 +11,16 @@ import io.ktor.server.engine.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consume
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import java.io.File
 
-class DiscordPlugin: KotlinPlugin() {
+class DiscordPlugin : KotlinPlugin() {
     @Serializable
     data class Config(val port: Int)
+
     lateinit var config: Config
     override fun onPluginLoad() {
         config = Json.decodeFromString(Config.serializer(), File(dataFolder, "config.json").readText())
