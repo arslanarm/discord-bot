@@ -3,6 +3,7 @@ package me.plony.discord
 import br.com.devsrsouza.kotlinbukkitapi.architecture.KotlinPlugin
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.event
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.events
+import de.jeter.chatex.api.events.PlayerUsesGlobalChatEvent
 import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
@@ -14,8 +15,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.bukkit.event.player.AsyncPlayerChatEvent
 import java.io.File
+
 
 class DiscordPlugin : KotlinPlugin() {
     @Serializable
@@ -42,9 +43,9 @@ class DiscordPlugin : KotlinPlugin() {
         }.start(wait = false)
 
         events {
-            event<AsyncPlayerChatEvent> {
-                println("${player.displayName} $message")
-                GlobalScope.launch { output.send(MinecraftMessage(player.displayName, message)) }
+            event<PlayerUsesGlobalChatEvent> {
+                println("${player.name} $message")
+                GlobalScope.launch { output.send(MinecraftMessage(player.name, message)) }
             }
         }
     }
