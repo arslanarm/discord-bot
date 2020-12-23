@@ -42,15 +42,18 @@ fun DiscordReceiver.minecraftChat() {
                     val guild = kord.getGuild(Snowflake(config.guild))!!
                     val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
                     channel.live()
-                        .on<MessageCreateEvent>(this) messages@{
-                            val author = it.message.author
+                        .on<MessageCreateEvent>(this) messages@{ event ->
+                            val author = event.message.author
                             if (author?.isBot == true) return@messages
                             val authorName = author?.run { "$username#$discriminator" } ?: return@messages
                             val role = author.asMember(guild.id)
                                 .roles
                                 .toList()
                                 .minByOrNull { it.rawPosition }
-                            val message = it.message.content
+                            val message = event.message.run {
+                                content + if (attachments.isNotEmpty()) "\nВложения:\n" + attachments.joinToString("\n") { it.url }
+                                else ""
+                            }
                             val roleColor = role?.color?.mColor ?: java.awt.Color.GRAY.mColor
                             output.send(MinecraftMessage(authorName, message, roleColor))
                         }
@@ -66,7 +69,6 @@ fun DiscordReceiver.minecraftChat() {
                             val messageString = messageFrame
                                 .readBytes()
                                 .decodeToString()
-                                .replace(Regex("§[0-9a-fk-or]"), "")
                             val message = Json.decodeFromString(
                                 MinecraftMessage.serializer(),
                                 messageString

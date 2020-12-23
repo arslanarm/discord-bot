@@ -47,25 +47,29 @@ class DiscordPlugin : KotlinPlugin() {
                             val message = Json.decodeFromString(MinecraftMessage.serializer(), messageString)
                             server.broadcastMessage(
                                 ChatColor.AQUA + "Discord: " + message.color.toChatColor() + "[${message.author}] "
-                                        + ChatColor.AQUA + message.content
+                                        + ChatColor.GRAY + message.content
                             )
                         }
                     }
                     for (message in output) {
-                        val json = Json.encodeToString(MinecraftMessage.serializer(), message)
-                        outgoing.send(Frame.Text(json))
+                        val json = ChatColor.stripColor(Json.encodeToString(MinecraftMessage.serializer(), message))
+                        outgoing.send(Frame.Text(json!!))
                     }
                 }
             }
         }.start(wait = false)
-
+        val chat = ChatExAPI()
         events {
             event<PlayerUsesGlobalChatEvent> {
-                GlobalScope.launch { output.send(MinecraftMessage(player.name, message, encodeStringToColor(player.name))) }
+                GlobalScope.launch {
+                    val prefix = chat.getPrefix(player)
+                    val color = colorRegex.find(prefix)?.value?.let { ChatColor.getByChar(it) } ?: ChatColor.GRAY
+                    output.send(MinecraftMessage(player.name, message, chatColorNameToColor[color]!!))
+                }
             }
         }
     }
-
+    private val colorRegex = Regex("§[0-9a-f]")
     @Serializable
     data class MinecraftMessage(val author: String, val content: String, val color: Color)
     @Serializable
@@ -98,11 +102,4 @@ class DiscordPlugin : KotlinPlugin() {
         ChatColor.YELLOW to Color(255, 255, 85)
     )
     private fun ChatColor.hsb() = chatColorNameToColor[this]!!.hsb()
-
-    private fun encodeStringToColor(author: String): Color {
-        val r = author.encodeToByteArray().sum() % 256
-        val g = author.encodeOAuth().encodeToByteArray().sum() % 256
-        val b = author.encodeBase64().encodeToByteArray().sum() % 256
-        return Color(r, g, b)
-    }
 }
