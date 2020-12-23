@@ -2,6 +2,7 @@ package me.plony.bot.services
 
 import dev.kord.common.Color
 import dev.kord.common.entity.Snowflake
+import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.gateway.ReadyEvent
@@ -15,6 +16,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -41,10 +43,16 @@ fun DiscordReceiver.minecraftChat() {
                     val channel = guild.getChannel(Snowflake(config.channel)) as TextChannel
                     channel.live()
                         .on<MessageCreateEvent>(this) messages@{
-                            if (it.message.author?.isBot == true) return@messages
-                            val author = it.message.author?.run { "$username#$discriminator" } ?: return@messages
+                            val author = it.message.author
+                            if (author?.isBot == true) return@messages
+                            val authorName = author?.run { "$username#$discriminator" } ?: return@messages
+                            val role = author.asMember(guild.id)
+                                .roles
+                                .toList()
+                                .minByOrNull { it.rawPosition }
                             val message = it.message.content
-                            output.send(MinecraftMessage(author, message))
+                            val roleColor = role?.color?.mColor ?: java.awt.Color.GRAY.mColor
+                            output.send(MinecraftMessage(authorName, message, roleColor))
                         }
 
                     client.webSocket(config.url) {
@@ -66,7 +74,7 @@ fun DiscordReceiver.minecraftChat() {
                             channel.createEmbed {
                                 description = message.content
                                 author { name = message.author }
-                                color = encodeStringToColor(message.author)
+                                color = message.color.kColor
                             }
                         }
                     }
@@ -80,12 +88,13 @@ fun DiscordReceiver.minecraftChat() {
 }
 
 
-fun encodeStringToColor(author: String): Color {
-    val r = author.encodeToByteArray().sum() % 256
-    val g = author.encodeOAuth().encodeToByteArray().sum() % 256
-    val b = author.encodeBase64().encodeToByteArray().sum() % 256
-    return Color(r, g, b)
-}
+
 
 @Serializable
-data class MinecraftMessage(val author: String, val content: String)
+data class MinecraftMessage(val author: String, val content: String, val color: MinecraftColor)
+@Serializable
+data class MinecraftColor(val r: Int, val g: Int, val b: Int)
+val java.awt.Color.mColor get() = MinecraftColor(red, green, blue)
+val Color.mColor get() = MinecraftColor(red, green, blue)
+val MinecraftColor.kColor
+    get() = Color(r, g, b)

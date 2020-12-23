@@ -59,7 +59,9 @@ subprojects {
             "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
             "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-            "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
+            "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
+            "-Xopt-in=dev.kord.common.annotation.KordPreview",
+            "-Xopt-in=io.ktor.util.InternalAPI"
         )
     }
 }

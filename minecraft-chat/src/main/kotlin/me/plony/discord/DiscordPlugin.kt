@@ -3,19 +3,23 @@ package me.plony.discord
 import br.com.devsrsouza.kotlinbukkitapi.architecture.KotlinPlugin
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.event
 import br.com.devsrsouza.kotlinbukkitapi.extensions.event.events
+import de.jeter.chatex.api.ChatExAPI
 import de.jeter.chatex.api.events.PlayerUsesGlobalChatEvent
 import de.jeter.chatex.api.events.PlayerUsesRangeModeEvent
 import io.ktor.application.*
+import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.awt.Color
 import java.io.File
 
 
@@ -38,7 +42,7 @@ class DiscordPlugin : KotlinPlugin() {
                         for (messageFrame in incoming) {
                             val messageString = messageFrame.readBytes().decodeToString()
                             val message = Json.decodeFromString(MinecraftMessage.serializer(), messageString)
-                            server.consoleSender.sendMessage("&3Discord: [${message.author}] ${message.content}")
+                            server.broadcastMessage("&3Discord: [${message.author}] ${message.content}")
                         }
                     }
                     for (message in output) {
@@ -50,12 +54,20 @@ class DiscordPlugin : KotlinPlugin() {
         }.start(wait = false)
 
         events {
-            event<PlayerUsesRangeModeEvent> {
-                GlobalScope.launch { output.send(MinecraftMessage(player.name, message)) }
+            event<PlayerUsesGlobalChatEvent> {
+                GlobalScope.launch { output.send(MinecraftMessage(player.name, message, encodeStringToColor(player.name))) }
             }
         }
     }
 
     @Serializable
-    data class MinecraftMessage(val author: String, val content: String)
+    data class MinecraftMessage(val author: String, val content: String, val color: Color)
+    @Serializable
+    data class Color(val r: Int, val g: Int, val b: Int)
+    fun encodeStringToColor(author: String): Color {
+        val r = author.encodeToByteArray().sum() % 256
+        val g = author.encodeOAuth().encodeToByteArray().sum() % 256
+        val b = author.encodeBase64().encodeToByteArray().sum() % 256
+        return Color(r, g, b)
+    }
 }
