@@ -75,7 +75,8 @@ tasks.withType<KotlinCompile>() {
         "-Xopt-in=kotlin.contracts.ExperimentalContracts",
         "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
         "-Xopt-in=dev.kord.common.annotation.KordPreview",
-        "-Xopt-in=io.ktor.util.InternalAPI"
+        "-Xopt-in=io.ktor.util.InternalAPI",
+        "-Xopt-in=kotlinx.coroutines.FlowPreview"
     )
 }
 

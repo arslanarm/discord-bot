@@ -66,8 +66,10 @@ fun DiscordReceiver.privateChannels() {
 
             if (old?.channelId in privateChannels) {
                 val channel = old?.getChannelOrNull()
-                if (channel?.voiceStates?.count() == 0)
+                if (channel?.voiceStates?.count() == 0) {
                     channel.delete()
+                    privateChannels.remove(channel.id)
+                }
             }
         }
     }

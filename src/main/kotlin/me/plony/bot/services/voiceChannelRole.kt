@@ -2,18 +2,18 @@ package me.plony.bot.services
 
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Role
+import dev.kord.core.entity.channel.VoiceChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import me.plony.bot.utils.shortcuts.readConfig
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
+
 
 @Module
 fun DiscordReceiver.voiceChannelRole() {
@@ -25,16 +25,13 @@ fun DiscordReceiver.voiceChannelRole() {
         val guild = kord.getGuild(Snowflake(config.guild))!!
 
         guild.members
-            .onEach {
-                val state = it.getVoiceStateOrNull()
-                when {
-                    state?.channelId == null && roleSnowflake in it.roleIds ->
-                        it.removeRole(roleSnowflake)
-                    state?.channelId != null && roleSnowflake !in it.roleIds ->
-                        it.addRole(roleSnowflake)
-                }
-            }
-            .collect()
+            .map { async { it.removeRole(roleSnowflake) } }
+            .collect { it.await() }
+
+        guild.channels
+            .filterIsInstance<VoiceChannel>()
+            .flatMapConcat { it.voiceStates }
+            .collect { it.getMember().addRole(roleSnowflake) }
     }
 
     on<VoiceStateUpdateEvent> {
