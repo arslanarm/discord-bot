@@ -26,20 +26,15 @@ fun DiscordReceiver.voiceChannelRole() {
 
         guild.members
             .onEach {
-                if (roleSnowflake in it.roleIds && it.getVoiceStateOrNull()?.channelId == null) {
-                    it.removeRole(roleSnowflake)
+                val state = it.getVoiceStateOrNull()
+                when {
+                    state?.channelId == null && roleSnowflake in it.roleIds ->
+                        it.removeRole(roleSnowflake)
+                    state?.channelId != null && roleSnowflake !in it.roleIds ->
+                        it.addRole(roleSnowflake)
                 }
             }
-            .launchIn(this)
-
-        guild.voiceStates
-            .onEach {
-                val member = it.getMember()
-                if (it.channelId != null && roleSnowflake !in member.roleIds) {
-                    member.addRole(roleSnowflake)
-                }
-            }
-            .launchIn(this)
+            .collect()
     }
 
     on<VoiceStateUpdateEvent> {
