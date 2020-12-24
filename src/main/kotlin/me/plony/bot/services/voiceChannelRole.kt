@@ -5,6 +5,8 @@ import dev.kord.core.entity.Role
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -21,34 +23,34 @@ fun DiscordReceiver.voiceChannelRole() {
     val roleSnowflake = Snowflake(config.roleId)
     on<ReadyEvent> {
         val guild = kord.getGuild(Snowflake(config.guild))!!
-        launch {
-            guild.members.collect {
+
+        guild.members
+            .onEach {
                 if (roleSnowflake in it.roleIds && it.getVoiceStateOrNull()?.channelId == null) {
                     it.removeRole(roleSnowflake)
                 }
             }
-        }
-        guild.voiceStates.collect {
-            val member = it.getMember()
-            if (it.channelId != null && roleSnowflake !in member.roleIds) {
-                member.addRole(roleSnowflake)
+            .launchIn(this)
+
+        guild.voiceStates
+            .onEach {
+                val member = it.getMember()
+                if (it.channelId != null && roleSnowflake !in member.roleIds) {
+                    member.addRole(roleSnowflake)
+                }
             }
-        }
+            .launchIn(this)
     }
 
     on<VoiceStateUpdateEvent> {
         if (state.guildId.asString != config.guild) return@on
-        if (state.channelId != null) {
-            val member = state.getMember()
-            if (roleSnowflake !in member.roleIds) {
-                member.addRole(roleSnowflake)
-            }
-        } else {
-            val member = state.getMember()
-            if (roleSnowflake in member.roleIds) {
-                member.removeRole(roleSnowflake)
-            }
-        }
 
+        val member = state.getMember()
+        when {
+            state.channelId != null && roleSnowflake !in member.roleIds ->
+                member.addRole(roleSnowflake)
+            state.channelId == null && roleSnowflake in member.roleIds ->
+                member.removeRole(roleSnowflake)
+        }
     }
 }
