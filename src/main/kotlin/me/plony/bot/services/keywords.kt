@@ -21,7 +21,9 @@ fun DiscordReceiver.keywords() {
         val index = config.keywords
             .indexOfFirst { normalizedString in it }
         if (index == -1) return@on
-        val randomPhrase = config.responses[index].random()
+        val randomPhrase = config.responses[index]
+            .random()
+            .format(message.author?.mention)
         message.channel.createMessage(randomPhrase)
     }
 }
