@@ -63,7 +63,8 @@ fun DiscordReceiver.privateChannels() {
                 }
                 user.move(voice.id)
             }
-
+        }
+        on<VoiceStateUpdateEvent> {
             if (old?.channelId in privateChannels) {
                 val channel = old?.getChannelOrNull()
                 if (channel?.voiceStates?.count() == 0) {
