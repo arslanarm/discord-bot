@@ -28,4 +28,18 @@ fun DiscordReceiver.deletion() {
             .launchIn(this)
         }
         .launchIn(this)
+
+    messages()
+        .filter { it.message.getAuthorAsMember()
+            ?.roles
+            ?.any { Permission.ManageMessages in it.permissions } == true
+        }
+        .filter { it.message.content == "${prefix}удали все"}
+        .map { event ->
+            event.message
+                .channel
+                .messages
+                .collect { it.delete() }
+        }
+        .launchIn(this)
 }
