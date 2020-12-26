@@ -21,10 +21,13 @@ fun DiscordReceiver.voiceChannelRole() {
     data class Config(val guild: String, val roleId: String)
     val config = readConfig(Config.serializer(), "data/voiceChanelRole", "config.json")
     val roleSnowflake = Snowflake(config.roleId)
-    on<ReadyEvent> {
-        val guild = kord.getGuild(Snowflake(config.guild))!!
 
+    on<ReadyEvent> {
+        println("here")
+        val guild = kord.getGuild(Snowflake(config.guild))!!
         guild.members
+            .filter { roleSnowflake in it.roleIds }
+            .onEach { println(it) }
             .map { async { it.removeRole(roleSnowflake) } }
             .collect { it.await() }
 
@@ -36,8 +39,8 @@ fun DiscordReceiver.voiceChannelRole() {
 
     on<VoiceStateUpdateEvent> {
         if (state.guildId.asString != config.guild) return@on
-
         val member = state.getMember()
+        println("${state.channelId} ${roleSnowflake in member.roleIds}")
         when {
             state.channelId != null && roleSnowflake !in member.roleIds ->
                 member.addRole(roleSnowflake)

@@ -76,7 +76,8 @@ tasks.withType<KotlinCompile>() {
         "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
         "-Xopt-in=dev.kord.common.annotation.KordPreview",
         "-Xopt-in=io.ktor.util.InternalAPI",
-        "-Xopt-in=kotlinx.coroutines.FlowPreview"
+        "-Xopt-in=kotlinx.coroutines.FlowPreview",
+        "-Xinline-classes"
     )
 }
 
