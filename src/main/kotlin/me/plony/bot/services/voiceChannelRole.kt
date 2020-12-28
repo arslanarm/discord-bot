@@ -33,8 +33,10 @@ fun DiscordReceiver.voiceChannelRole() {
 
         guild.channels
             .filterIsInstance<VoiceChannel>()
-            .flatMapConcat { it.voiceStates }
-            .collect { it.getMember().addRole(roleSnowflake) }
+            .flatMapConcat { it.data.recipients.value?.asFlow() ?: emptyFlow() }
+            .map { guild.getMember(it) }
+            .filter { roleSnowflake !in it.roleIds }
+            .collect { it.addRole(roleSnowflake) }
     }
 
     on<VoiceStateUpdateEvent> {

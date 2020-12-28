@@ -10,10 +10,13 @@ import dev.kord.core.behavior.createVoiceChannel
 import dev.kord.core.entity.channel.VoiceChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
+import dev.kord.core.live.live
 import dev.kord.core.supplier.EntitySupplier
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import me.plony.bot.utils.api.inline.InlineGuild
@@ -22,6 +25,7 @@ import me.plony.bot.utils.shortcuts.readConfig
 import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
+import kotlin.time.seconds
 
 @Module
 fun DiscordReceiver.privateChannels() {
@@ -67,14 +71,22 @@ fun DiscordReceiver.privateChannels() {
                     }
                 }
             }
-            user.move(voice.id)
+            try {
+                withTimeout(2.seconds) {
+                    user.move(voice.id)
+                }
+            } catch (e: Throwable) {
+                privateChannels.remove(voice.id)
+                voice.delete()
+            }
+
         }
         on<VoiceStateUpdateEvent> {
             if (old?.channelId in privateChannels) {
                 val channel = old?.getChannelOrNull()
-                if (channel?.voiceStates?.count() == 0) {
-                    channel.delete()
+                if (channel?.voiceStates?.onEach { println(it) }?.count() == 0) {
                     privateChannels.remove(channel.id)
+                    channel.delete()
                 }
             }
         }

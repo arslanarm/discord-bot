@@ -84,3 +84,13 @@ tasks.withType<KotlinCompile>() {
 application {
     mainClassName = "me.plony.bot.MainKt"
 }
+
+tasks {
+    jar {
+        manifest.attributes("Main-Class" to "me.plony.bot.MainKt")
+        dependsOn(configurations.runtimeClasspath)
+        from({
+            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+        })
+    }
+}
