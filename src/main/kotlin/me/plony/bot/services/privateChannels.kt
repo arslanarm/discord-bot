@@ -19,7 +19,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import me.plony.bot.utils.api.inline.InlineGuild
+import me.plony.bot.utils.api.inline.asGuild
 import me.plony.bot.utils.shortcuts.move
 import me.plony.bot.utils.shortcuts.readConfig
 import me.plony.processor.DiscordReceiver
@@ -59,7 +59,7 @@ fun DiscordReceiver.privateChannels() {
         on<VoiceStateUpdateEvent> {
             if (state.channelId?.asString != config.creatorChannel) return@on
             val user = state.getMember()
-            val guild = InlineGuild(state.guildId, kord)
+            val guild = state.guildId.asGuild(kord)
             val voice = guild.createVoiceChannel(user.displayName) {
                 parentId = Snowflake(config.creatingCategory)
             }

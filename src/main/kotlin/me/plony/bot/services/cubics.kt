@@ -5,7 +5,8 @@ import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.Job
-import me.plony.bot.utils.api.cubics.Dice
+import kotlinx.coroutines.launch
+import me.plony.bot.utils.api.cubics.Expression
 import me.plony.bot.utils.api.cubics.compute
 import me.plony.bot.utils.globals.prefix
 import me.plony.processor.DiscordReceiver
@@ -24,12 +25,22 @@ fun DiscordReceiver.cubics() {
             .trim()
         if (query.isBlank())
             return@on message.channel.createEmbed {
-                description = "Результат: ${Dice(16).value}"
+                description = "Результат: ${Expression.Dice(16).value}"
                 color = java.awt.Color.GRAY.kColor
             }.let {}
         try {
             val job = Job()
-            val result = compute(query, job).eval().toString()
+            val result = compute(query, job) {
+                this@cubics.launch {
+                    message.channel.createEmbed {
+                        title = "Результат ${number}d${max}"
+                        color = java.awt.Color.CYAN.kColor
+                        description = dices.joinToString(" + ") {
+                            it.eval().toString()
+                        } + " = ${eval()}"
+                    }
+                }
+            }.eval().toString()
             job.join()
             message.channel.createEmbed {
                 title = "Общий результат"

@@ -4,8 +4,9 @@ import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.*
-import me.plony.bot.utils.api.cubics.Operation.OperationType.DoubleOperator
-import me.plony.bot.utils.api.cubics.Operation.OperationType.SingleOperator
+import me.plony.bot.utils.api.cubics.Expression.*
+import me.plony.bot.utils.api.cubics.Expression.Operation.OperationType.*
+import me.plony.bot.utils.api.cubics.Expression.Operation.OperationType.DoubleOperator.DIVIDE.operator
 import java.awt.Color
 import kotlin.math.max
 import kotlin.math.min
@@ -25,7 +26,7 @@ val stringDelimiters = delimiters
     .map { it.operator }
     .toTypedArray()
 
-fun MessageCreateEvent.compute(s: String, job: CompletableJob): Expression {
+fun MessageCreateEvent.compute(s: String, job: CompletableJob, onDiceRoll: MultipleDice.() -> Unit): Expression {
     val normalizedString = s.replace(" ", "")
     val elements = normalizedString.split(*stringDelimiters)
     val operations = normalizedString.findOperation(delimiters)
@@ -35,7 +36,7 @@ fun MessageCreateEvent.compute(s: String, job: CompletableJob): Expression {
         .fold(Empty as Expression) { acc, (s, op) ->
             val expression = when  {
                 s.isBlank() -> Empty
-                s.startsWith("(") -> compute(s.drop(1).dropLast(1), Job(job))
+                s.startsWith("(") -> compute(s.drop(1).dropLast(1), Job(job), onDiceRoll)
                 else -> {
                     val doubleValue = s.toDoubleOrNull()
                     if (doubleValue != null)
@@ -48,15 +49,7 @@ fun MessageCreateEvent.compute(s: String, job: CompletableJob): Expression {
                             }
                             .map(String::toInt)
                         require(amount > 0 && max > 0)
-                        MultipleDice(amount, max).also {
-                            GlobalScope.launch(job) { message.channel.createEmbed {
-                                title = "Результат ${amount}d${max}"
-                                color = Color.CYAN.kColor
-                                description = it.dices.joinToString(" + ") {
-                                    it.eval().toString()
-                                } + " = ${it.eval()}"
-                            } }
-                        }
+                        MultipleDice(amount, max).also(onDiceRoll)
                     }
                 }
             }

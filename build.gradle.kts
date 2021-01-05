@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.4.21"
     kotlin("plugin.serialization") version "1.4.21"
     kotlin("kapt") version "1.4.21"
+    id("com.palantir.graal") version "0.7.2"
     application
 }
 
@@ -93,4 +94,10 @@ tasks {
             configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
         })
     }
+}
+
+graal {
+    mainClass("me.plony.bot.MainKt")
+    javaVersion("8")
+    outputName("bot")
 }
