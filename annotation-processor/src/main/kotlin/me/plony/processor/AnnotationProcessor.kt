@@ -15,7 +15,7 @@ import javax.tools.Diagnostic
 @Target(AnnotationTarget.FUNCTION)
 annotation class Module(val help: String = "")
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("me.plony.processor.Module")
 @SupportedOptions(AnnotationProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
 class AnnotationProcessor : AbstractProcessor() {
