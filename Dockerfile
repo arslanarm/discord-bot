@@ -1,4 +1,4 @@
-FROM oracle/graalvm-ce
+FROM oracle/graalvm-ce:latest
 
 RUN yum install -y zip unzip
 RUN gu install native-image
