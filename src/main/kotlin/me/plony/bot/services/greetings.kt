@@ -10,7 +10,6 @@ import me.plony.processor.DiscordReceiver
 import me.plony.processor.Module
 import me.plony.processor.on
 
-@Module
 fun DiscordReceiver.greetings() {
     @Serializable
     data class Config(val guild: String, val channel: String, val greetings: List<String>)

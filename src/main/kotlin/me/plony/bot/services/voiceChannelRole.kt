@@ -33,15 +33,15 @@ fun DiscordReceiver.voiceChannelRole() {
     on<ReadyEvent> {
         println("here")
         val guild = kord.getGuild(Snowflake(config.guild))!!
-        guild.withStrategy(EntitySupplyStrategy.rest).members
-            .asyncMap(this) { it.asMember() }
-            .onEach { println(it.displayName) }
-            .filter { roleSnowflake in it.roleIds && it.getVoiceStateOrNull()?.channelId == null }
-            .asyncMap(this) { it.removeRole(roleSnowflake) }
-            .launchIn(this@voiceChannelRole)
-            .invokeOnCompletion {
-                println("Members Completed")
-            }
+//        guild.withStrategy(EntitySupplyStrategy.rest).members
+//            .asyncMap(this) { it.asMember() }
+//            .onEach { println(it.displayName) }
+//            .filter { roleSnowflake in it.roleIds && it.getVoiceStateOrNull()?.channelId == null }
+//            .asyncMap(this) { it.removeRole(roleSnowflake) }
+//            .launchIn(this@voiceChannelRole)
+//            .invokeOnCompletion {
+//                println("Members Completed")
+//            }
 
         guild.channels
             .filterIsInstance<VoiceChannel>()

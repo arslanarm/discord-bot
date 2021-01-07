@@ -12,6 +12,7 @@ import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.live.live
 import dev.kord.core.supplier.EntitySupplier
+import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -48,7 +49,8 @@ fun DiscordReceiver.privateChannels() {
                 .filter { it.data.parentId?.value == Snowflake(config.creatingCategory) }
                 .onEach {
                     if (it.id.asString !in config.defaultChannels)
-                        if (it.voiceStates.count() == 0) {
+                        if (it.voiceStates
+                                .count() == 0) {
                             it.delete()
                         } else {
                             privateChannels.add(it.id)
@@ -58,8 +60,9 @@ fun DiscordReceiver.privateChannels() {
         }
         on<VoiceStateUpdateEvent> {
             if (state.channelId?.asString != config.creatorChannel) return@on
-            val user = state.getMember()
+            val userDeferred = async { state.getMember() }
             val guild = state.guildId.asGuild(kord)
+            val user = userDeferred.await()
             val voice = guild.createVoiceChannel(user.displayName) {
                 parentId = Snowflake(config.creatingCategory)
             }
@@ -84,7 +87,7 @@ fun DiscordReceiver.privateChannels() {
         on<VoiceStateUpdateEvent> {
             if (old?.channelId in privateChannels) {
                 val channel = old?.getChannelOrNull()
-                if (channel?.voiceStates?.onEach { println(it) }?.count() == 0) {
+                if (channel?.voiceStates?.count() == 0) {
                     privateChannels.remove(channel.id)
                     channel.delete()
                 }
