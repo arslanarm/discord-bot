@@ -1,35 +1,33 @@
 package me.plony.bot
 
-import createServices
-import dev.kord.core.Kord
-import dev.kord.core.supplier.EntitySupplyStrategy
-import dev.kord.gateway.Intent
-import dev.kord.gateway.Intents
-import dev.kord.gateway.PrivilegedIntent
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
+import com.kotlindiscord.kord.extensions.ExtensibleBot
+import me.plony.bot.database.BannedNames
+import me.plony.bot.database.MutedUsers
+import me.plony.bot.extensions.ModerationExtension
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 
-@OptIn(PrivilegedIntent::class)
 suspend fun main(args: Array<String>) {
-    val token = args.getOrNull(0) ?: System.getenv("TOKEN") ?: error("Token is not specified")
-    val port = args.getOrNull(1)?.toIntOrNull() ?: 7070
-    val kord = Kord(token) {
-        intents = Intents {
-            +Intent.GuildVoiceStates
-            +Intent.GuildMembers
-            +Intent.GuildMessages
-            +Intent.GuildMessageReactions
-        }
-        httpClient = HttpClient(CIO) {
-            engine {
-                threadsCount = 20
-            }
-        }
-        defaultStrategy = EntitySupplyStrategy.rest
+    configureDatabase()
+    val bot = ExtensibleBot(
+        args[1],
+        args[0]
+    )
+
+    bot.run {
+        addExtension { ModerationExtension(it) }
     }
-    with(kord) {
-        val serviceManager = createServices()
-        server(port, serviceManager)
-        login()
+
+    bot.start()
+}
+
+fun configureDatabase() {
+    Database.connect("jdbc:h2:./data", "org.h2.Driver")
+    transaction {
+        SchemaUtils.create(
+            BannedNames,
+            MutedUsers
+        )
     }
 }

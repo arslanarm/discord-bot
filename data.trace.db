@@ -1,4 +1,0 @@
-2021-01-22 05:55:18 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "MUTEDUSERS" не найдена
-Table "MUTEDUSERS" not found; SQL statement:
-SELECT MUTEDUSERS.ID, MUTEDUSERS."userId", MUTEDUSERS.UNTIL FROM MUTEDUSERS [42102-199]
