@@ -65,7 +65,7 @@ internal class KordLink(internal val lavalink: KordLavaLink, guildId: String?) :
             guild.localGateway.send(
                 UpdateVoiceStatus(
                     Snowflake(guildIdLong),
-                    Snowflake(-1),
+                    null,
                     selfMute = false,
                     selfDeaf = false
                 )
