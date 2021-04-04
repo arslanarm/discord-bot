@@ -1,10 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.21"
-    kotlin("plugin.serialization") version "1.4.21"
-    kotlin("kapt") version "1.4.21"
-    id("com.palantir.graal") version "0.7.2"
+    kotlin("jvm") version "1.4.30"
+    kotlin("plugin.serialization") version "1.4.30"
     application
 }
 
@@ -47,29 +45,6 @@ dependencies {
 subprojects {
     plugins.apply("org.jetbrains.kotlin.jvm")
     plugins.apply("org.jetbrains.kotlin.plugin.serialization")
-
-    repositories {
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("http://nexus.devsrsouza.com.br/repository/maven-public/")
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots")
-        maven("https://dl.bintray.com/kordlib/Kord")
-        maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
-        jcenter()
-    }
-
-    tasks.withType<KotlinCompile>() {
-        kotlinOptions.jvmTarget = "1.8"
-        kotlinOptions.freeCompilerArgs = listOf(
-            "-Xopt-in=kotlin.time.ExperimentalTime",
-            "-Xopt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
-            "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-            "-Xopt-in=io.ktor.util.KtorExperimentalAPI",
-            "-Xopt-in=dev.kord.common.annotation.KordPreview",
-            "-Xopt-in=io.ktor.util.InternalAPI"
-        )
-    }
 }
 
 tasks.withType<KotlinCompile>() {
@@ -99,10 +74,4 @@ tasks {
             configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
         })
     }
-}
-
-graal {
-    mainClass("me.plony.bot.MainKt")
-    javaVersion("8")
-    outputName("bot")
 }

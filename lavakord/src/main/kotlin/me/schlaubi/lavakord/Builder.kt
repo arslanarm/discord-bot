@@ -18,7 +18,7 @@ public fun Kord.lavalink(configure: MutableKordLinkOptions.() -> Unit = {}): Lav
         this,
         options,
         selfId.asString,
-        resources.shardCount
+        resources.shards.totalShards
     )
 }
 

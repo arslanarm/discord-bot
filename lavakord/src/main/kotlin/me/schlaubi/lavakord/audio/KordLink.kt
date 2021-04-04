@@ -126,4 +126,4 @@ private val Guild.localGateway: Gateway
 
 // https://discord.com/developers/docs/topics/gateway#sharding-sharding-formula
 private val Guild.gatewayId: Int
-    get() = ((id.value shl 22) % kord.resources.shardCount).toInt()
+    get() = ((id.value shl 22) % kord.resources.shards.totalShards).toInt()
