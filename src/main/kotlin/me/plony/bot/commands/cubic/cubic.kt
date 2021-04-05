@@ -33,27 +33,29 @@ suspend fun Extension.cubic() = command {
 interface Stackable
 
 sealed class Value: Stackable {
-    abstract fun toNumber(): Number
     data class Dice(val dices: List<Number>) : Value() {
         constructor(times: Int, max: Int) : this((1..times).map { Number((1..max).random().toBigDecimal()) })
 
-        override fun toNumber(): Number = Number(dices.sumOf(Number::number))
+        fun toNumber(): Number = Number(dices.sumOf(Number::number))
         override fun toString() = dices.joinToString(", ", prefix = "D[", postfix = "]")
     }
     class Number(val number: BigDecimal) : Value() {
-        override fun toNumber() = this
         override fun toString(): String = number.toString()
     }
 }
 
 private fun eval(query: String): Flow<String> = flow {
-    val memory = mutableListOf<Value.Number>()
+    val memory = mutableListOf<Value>()
     query.replace("\n", "")
         .split(";")
         .filterNot(String::isEmpty)
         .forEach {
             val value = evalLine(memory, it)
-            memory.add(value.toNumber())
+            when (value) {
+                is Value.Dice -> memory.add(value.toNumber())
+                is Value.Number -> memory.add(value)
+            }
+
             when (value) {
                 is Value.Dice -> emit("$value = ${value.toNumber()}")
                 is Value.Number -> emit(value.toString())
@@ -89,7 +91,7 @@ enum class Op(val char: Char): Stackable {
     }
 }
 
-private fun evalLine(memory: List<Value.Number>, line: String): Value =
+private fun evalLine(memory: List<Value>, line: String): Value =
     Parser(Lexer(line), memory)
         .parse()
         .eval()
@@ -122,6 +124,16 @@ class Lexer(val line: String) : Iterator<Token?> {
         while (hasNext()) {
             val lineLeft = line.drop(cursor).trimStart()
             cursor = line.length - lineLeft.length
+            when {
+                lineLeft.startsWith("//") -> {
+                    cursor = line.length
+                    continue
+                }
+                lineLeft.startsWith("/*") -> {
+                    cursor += lineLeft.indexOf("*/") + 2
+                    continue
+                }
+            }
             return when (lineLeft.first()) {
                 ' ' -> continue
                 in '0'..'9' -> parseNumberLiteral(lineLeft)
@@ -184,7 +196,7 @@ fun ASTNode.eval(): Value {
 
 class Parser(
     private val lexer: Lexer,
-    private val memory: List<Value.Number>
+    private val memory: List<Value>
     ) {
     private var lookup = lexer.next()
     fun parse(): ASTNode {

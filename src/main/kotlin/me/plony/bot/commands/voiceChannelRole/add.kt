@@ -20,24 +20,17 @@ suspend fun VoiceChannelRoleExtension.add() = with(kord) {
     data class Config(val guild: String, val roleId: String)
     val config = config(Config.serializer(), "voiceChanelRole")
     val roleSnowflake = Snowflake(config.roleId)
-
-    on<ReadyEvent> {
-        val guild = kord.getGuild(Snowflake(config.guild))!!
-
-        guild.live()
-            .events
-            .filterIsInstance<VoiceStateUpdateEvent>()
-            .onEach { launch {
-                val left = it.old?.channelId
-                val joined = it.state.channelId
-                val member = it.state.member
-                when {
-                    left == null && joined != null ->
-                        member.addRole(roleSnowflake)
-                    left != null && joined == null ->
-                        member.removeRole(roleSnowflake)
-                }
-            } }
-            .launchIn(this)
+    on<VoiceStateUpdateEvent> {
+        if (state.guildId != Snowflake(config.guild)) return@on
+        val left = old?.channelId
+        val joined = state.channelId
+        val member = state.member
+        println("MEMBER: ${member.nicknameMention} LEFT: ${left?.asString} JOINED ${joined?.asString}")
+        when {
+            left == null && joined != null ->
+                member.addRole(roleSnowflake)
+            left != null && joined == null ->
+                member.removeRole(roleSnowflake)
+        }
     }
 }
