@@ -30,6 +30,20 @@ suspend fun Extension.cubic() = command {
     }
 }
 
+suspend fun main() {
+    val query = readLine()!!
+    try {
+        val result = eval(query)
+            .withIndex()
+            .map { (i, s) -> "${i + 1}: $s" }
+            .toList()
+            .joinToString("\n")
+        println(result)
+    } catch (e: SyntaxError) {
+        println("Синтаксическая ошибка ${e.message}")
+    }
+}
+
 interface Stackable
 
 sealed class Value: Stackable {
@@ -41,6 +55,9 @@ sealed class Value: Stackable {
     }
     class Number(val number: BigDecimal) : Value() {
         override fun toString(): String = number.toString()
+    }
+    class Bool(val boolean: Boolean): Value() {
+        override fun toString(): String = boolean.toString()
     }
 }
 
@@ -83,11 +100,14 @@ enum class Op(val char: Char): Stackable {
         is Value.Dice -> when (second) {
             is Value.Dice -> throw SyntaxError("Операции между двумя кубиками внутри декларации одного кубика запрещены")
             is Value.Number -> first.copy(dices = first.dices.map { call(it, second) })
+            else -> throw SyntaxError("Операция '$char' между '$first' и '$second' не определена")
         }
         is Value.Number -> when (second) {
             is Value.Dice -> second.copy(dices = second.dices.map { call(it, first) })
             is Value.Number -> call(first, second)
+            else -> throw SyntaxError("Операция '$char' между '$first' и '$second' не определена")
         }
+        else -> throw SyntaxError("Операция '$char' между '$first' и '$second' не определена")
     }
 }
 
@@ -161,37 +181,25 @@ class Lexer(val line: String) : Iterator<Token?> {
     }
 }
 
-class ASTNode(val op: Op?): Stackable {
-    constructor(left: Value, right: Value, op: Op):this(op) {
-        leftValue = left
-        rightValue = right
+sealed class ASTNode: Stackable {
+    class ValueNode(val value: Value): ASTNode() {
+        override fun eval(): Value = value
     }
-    constructor(left: Value, right: ASTNode, op: Op):this(op) {
-        leftValue = left
-        rightExpression = right
+    class OpNode(val left: ASTNode, val right: ASTNode, val op: Op): ASTNode() {
+        override fun eval(): Value = op.call(left.eval(), right.eval())
     }
-    constructor(left: ASTNode, right: ASTNode, op: Op):this(op) {
-        leftExpression = left
-        rightExpression = right
+    class IfElseNode(val condition: ASTNode, val left: ASTNode, val right: ASTNode): ASTNode() {
+        override fun eval(): Value {
+            val cond = condition.eval()
+            val condBoolean = cond as? Value.Bool ?: throw SyntaxError("Условие внтури if должно возвращать тип bool, получено '$cond'")
+            return if (condBoolean.boolean)
+                left.eval()
+            else
+                right.eval()
+        }
     }
-    constructor(left: ASTNode, right: Value, op: Op):this(op) {
-        leftExpression = left
-        rightValue = right
-    }
-    var leftValue: Value? = null
-    var rightValue: Value? = null
-    var leftExpression: ASTNode? = null
-    var rightExpression: ASTNode? = null
-}
 
-fun ASTNode.eval(): Value {
-    val left = leftValue ?: leftExpression?.eval()
-    val right = rightValue ?: rightExpression?.eval()
-    op ?: return left ?: right ?: Value.Number(0.toBigDecimal())
-    return op.call(
-        left ?: throw SyntaxError("Левый операнд для операции '${op.char}' не найден"),
-        right ?: throw SyntaxError("Правый операнд для операции '${op.char}' не найден")
-    )
+    abstract fun eval(): Value
 }
 
 class Parser(
@@ -202,30 +210,19 @@ class Parser(
     fun parse(): ASTNode {
         val stackables = extractStackables()
         val reversePolishNotation = shuntingYard(stackables)
-        val stack = Stack<Stackable>()
+        val stack = Stack<ASTNode>()
         for (stackable in reversePolishNotation) {
             when (stackable) {
-                is Value -> stack.add(stackable)
+                is Value -> stack.add(ASTNode.ValueNode(stackable))
                 is Op -> {
                     val right = stack.pop()
                     val left = stack.pop()
-                    val node = when {
-                        right is Value && left is Value -> ASTNode(left, right, stackable)
-                        right is Value && left is ASTNode -> ASTNode(left, right, stackable)
-                        right is ASTNode && left is ASTNode -> ASTNode(left, right, stackable)
-                        right is ASTNode && left is Value -> ASTNode(left, right, stackable)
-                        else -> throw SyntaxError("Неизвестный тип как минимум у одного из операндов " +
-                                    "при создании AST из обратной польской записи")
-                    }
-                    stack.add(node)
+
+                    stack.add(ASTNode.OpNode(left, right, stackable))
                 }
             }
         }
-        return stack.pop().let { when (it) {
-            is ASTNode -> it
-            is Value -> ASTNode(null).apply { leftValue = it }
-            else -> throw SyntaxError("При создании AST в стеке было обнаружено значение неизвестного типа")
-        } }
+        return stack.pop()
     }
 
     private fun extractStackables(): List<Stackable> {
