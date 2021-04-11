@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.takeWhile
 import me.plony.bot.utils.DurationConvertor.Companion.duration
-import me.plony.bot.utils.execution
 import kotlin.time.toJavaDuration
 
 suspend fun Extension.deleteMessages() {
-    command {
+    command(::DeleteMessagesArgs) {
         name = "delete_messages"
         check(::isModerator)
-        execution({ DeleteMessagesArgs() }) { (user, time) ->
+        action {
+            val (user, time) = arguments
             message.delete()
             message.channel
                 .getMessagesBefore(message.id)
@@ -27,8 +27,8 @@ suspend fun Extension.deleteMessages() {
 }
 
 class DeleteMessagesArgs : Arguments() {
-    val user by user("user")
-    val time by duration("time")
+    val user by user("user", "User, messages of whom will be deleted")
+    val time by duration("time", "Time until messages will be deleted")
 
     operator fun component1() = user
     operator fun component2() = time

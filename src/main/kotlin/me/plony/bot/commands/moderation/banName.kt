@@ -14,7 +14,6 @@ import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import me.plony.bot.database.BannedName
-import me.plony.bot.utils.execution
 import me.plony.bot.utils.guild
 import me.plony.bot.utils.kord
 import me.plony.bot.utils.suspendedTransaction
@@ -29,13 +28,15 @@ suspend fun Extension.banName()  {
             member.ban()
     }
 
-    command {
+    command(::BanNameArgs) {
         name = "ban_name"
         check(::isModerator)
-        execution({ BanNameArgs() }) { (name) ->
+        action {
+            val (name) = arguments
             suspendedTransaction {
                 BannedName.new { this.name = name }
             }
+
             message.respond("Имя добавлено в черный список", useReply = false)
             event.guild!!.withStrategy(EntitySupplyStrategy.rest)
                 .members
@@ -46,6 +47,6 @@ suspend fun Extension.banName()  {
 }
 
 class BanNameArgs : Arguments() {
-    val name by string("name")
+    val name by string("name", "User to ban")
     operator fun component1() = name
 }

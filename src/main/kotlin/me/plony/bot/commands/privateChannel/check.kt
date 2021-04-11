@@ -17,11 +17,7 @@ fun PrivateChannelsExtension.check() = with(kord) {
                 .filter { it.data.parentId?.value == Snowflake(config.creatingCategory) }
                 .onEach {
                     if (it.id.asString !in config.defaultChannels)
-                        if (it.voiceStates.count() == 0) {
-                            it.delete()
-                        } else {
-                            privateChannels.add(it.id)
-                        }
+                        privateChannels.add(it.id)
                 }
                 .collect()
         }

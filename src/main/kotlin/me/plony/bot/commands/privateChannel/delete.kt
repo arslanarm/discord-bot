@@ -8,7 +8,7 @@ import me.plony.bot.utils.kord
 
 fun PrivateChannelsExtension.delete() = with(kord) {
     on<VoiceStateUpdateEvent> {
-        if (old?.channelId in privateChannels) {
+        if (old?.channelId?.asString !in configs.flatMap { it.defaultChannels }) {
             val channel = old?.getChannelOrNull()
             if (channel?.voiceStates?.count() == 0) {
                 privateChannels.remove(channel.id)

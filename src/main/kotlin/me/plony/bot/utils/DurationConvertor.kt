@@ -3,10 +3,13 @@ package me.plony.bot.utils
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
+import com.kotlindiscord.kord.extensions.commands.parser.Argument
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
+import dev.kord.rest.builder.interaction.OptionsBuilder
+import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import kotlin.time.*
 
-class DurationConvertor : SingleConverter<Duration>() {
+class DurationConvertor(val displayName: String, val description: String) : SingleConverter<Duration>() {
     override val signatureTypeString: String = "1d1h1m1s"
     override val errorTypeString: String = "<DAYS>d<HOURS>h<MINUTES>m<SECONDS>s"
     private val regex = Regex("(?=\\S+)([\\d]d)*([\\d]h)*([\\d]m)*([\\d]s)*")
@@ -31,7 +34,10 @@ class DurationConvertor : SingleConverter<Duration>() {
         return true
     }
 
+    override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder = StringChoiceBuilder(displayName, description)
+
+
     companion object {
-        fun Arguments.duration(displayName: String) = arg(displayName, DurationConvertor())
+        fun Arguments.duration(displayName: String, description: String) = arg(displayName, description, DurationConvertor(displayName, description))
     }
 }

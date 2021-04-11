@@ -8,7 +8,7 @@ plugins {
 
 group = "me.plony"
 version = "1.0-SNAPSHOT"
-val kordexVersion = "1.4.0-RC6"
+val kordexVersion = "1.4.0-RC7"
 val exposedVersion = "0.28.1"
 
 repositories {
@@ -25,7 +25,6 @@ repositories {
 
 dependencies {
     implementation("com.gitlab.kordlib:kordx.emoji:0.4.0")
-    implementation("dev.kord:kord-core:0.7.0-SNAPSHOT")
     implementation(project(":lavakord"))
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:$kordexVersion")
 
@@ -40,6 +39,7 @@ dependencies {
     implementation("com.h2database:h2:1.4.199")
 
     implementation("org.jsoup:jsoup:1.13.1")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 subprojects {
@@ -74,4 +74,12 @@ tasks {
             configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
         })
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

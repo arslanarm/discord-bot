@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 repositories {
     mavenCentral()
@@ -17,6 +18,7 @@ dependencies {
     compileOnly("dev.kord", "kord-core", "0.7.0-SNAPSHOT")
 
     api("com.github.FredBoat", "Lavalink-Client", "4.0")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 
@@ -32,4 +34,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
         "-Xopt-in=io.ktor.util.InternalAPI",
         "-Xopt-in=kotlin.RequiresOptIn"
     )
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

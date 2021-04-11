@@ -43,11 +43,12 @@ suspend fun Extension.mute() {
         } while (delay(10.seconds).returns())
     }
 
-    command {
+    command(::MuteArgs) {
         name = "mute"
 
         check(::isModerator)
-        execution({ MuteArgs() }) { (user, time) ->
+        action {
+            val (user, time) = arguments
             val member = user.asMember(guildId)
             member.addRole(roleId)
             suspendedTransaction {
@@ -62,8 +63,8 @@ suspend fun Extension.mute() {
 }
 
 class MuteArgs : Arguments() {
-    val user by user("user")
-    val time by duration("time")
+    val user by user("user", "User who will be muted")
+    val time by duration("time", "How long mute will be")
 
     operator fun component1() = user
     operator fun component2() = time
