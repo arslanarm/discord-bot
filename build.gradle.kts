@@ -1,15 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.30"
-    kotlin("plugin.serialization") version "1.4.30"
+    kotlin("jvm") version "1.5.31"
+    kotlin("plugin.serialization") version "1.5.30"
     application
 }
 
 group = "me.plony"
 version = "1.0-SNAPSHOT"
 val kordexVersion = "1.4.0-RC7"
-val exposedVersion = "0.28.1"
+val exposedVersion = "0.35.1"
 
 repositories {
     mavenCentral()
@@ -24,21 +24,23 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gitlab.kordlib:kordx.emoji:0.4.0")
-    implementation(project(":lavakord"))
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:$kordexVersion")
+//    implementation("com.gitlab.kordlib:kordx.emoji:0.4.0")
+    implementation("me.schlaubi:lavakord:0.3")
+    implementation("me.jakejmattson:DiscordKt:0.22.0")
+    implementation("com.github.ajalt.clikt:clikt:3.3.0")
+//    implementation("com.kotlindiscord.kord.extensions:kord-extensions:$kordexVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
-    implementation("io.github.microutils:kotlin-logging:1.12.0")
-    implementation("org.slf4j:slf4j-simple:1.7.30")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation("io.github.microutils:kotlin-logging:2.0.11")
+    implementation("org.slf4j:slf4j-simple:1.7.32")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation("com.h2database:h2:1.4.199")
+    implementation("com.h2database:h2:1.4.200")
 
-    implementation("org.jsoup:jsoup:1.13.1")
+    implementation("org.jsoup:jsoup:1.14.3")
     implementation(kotlin("stdlib-jdk8"))
 }
 
