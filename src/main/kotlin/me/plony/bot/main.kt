@@ -17,7 +17,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class RunBot : CliktCommand() {
     val token: String by argument()
-    val prefix: String by option().default("%%")
+    val prefix: String by option().default("%")
 
     override fun run() {
 

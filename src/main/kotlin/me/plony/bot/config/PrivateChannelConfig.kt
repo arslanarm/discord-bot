@@ -1,6 +1,9 @@
 package me.plony.bot.config
 
-open class PrivateChannelConfig(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class PrivateChannelConfig(
     val createChannel: Long,
     val createCategory: Long
 )
